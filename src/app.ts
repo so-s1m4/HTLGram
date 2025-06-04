@@ -14,6 +14,9 @@ app.use(limiter)
 app.use(cors())
 app.use(express.json())
 
+import userRouter from './modules/users/users.routes'
+
+app.use('/api/users', userRouter)
 
 import errorHandler from './common/middlewares/errorHandlerMiddleware'
 import notFound from './common/middlewares/notFoundMiddleware'

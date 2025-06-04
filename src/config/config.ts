@@ -4,11 +4,13 @@ dotenv.config()
 interface Config {
     PORT: number,
     JWT_SECRET_ADMIN: string,
-    MONGO_URI: string
+    MONGO_URI: string,
+    PASSWORD_SALT: number
 }
 
 export const config: Config = {
     PORT: Number(process.env.PORT) || 3000,
     JWT_SECRET_ADMIN: process.env.JWT_SECRET_ADMIN || "secret",
-    MONGO_URI: process.env.MONGO_URI || "mongodb://127.0.0.1:27017/htlgram"
+    MONGO_URI: process.env.MONGO_URI || "mongodb://127.0.0.1:27017/htlgram",
+    PASSWORD_SALT: Number(process.env.PASSWORD_SALT) || 10
 }

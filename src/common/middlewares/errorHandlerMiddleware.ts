@@ -1,15 +1,23 @@
 import {Request, Response, NextFunction} from 'express'
 
-interface ErrorWithStatus extends Error {
+export class ErrorWithStatus extends Error {
     status?: number
+
+    constructor(status: number, message: string) {
+        super(message)
+        this.status = status
+    }
 }
 
-const errorHandler = (err: ErrorWithStatus, req: Request, res: Response, next: NextFunction) => {
+const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
     console.log(err)
-
-    const status = err.status || 500
-    const message = err.message || "Internal server error"
-    res.status(status).json({message});
+    if (err instanceof ErrorWithStatus) {
+        const status = err.status || 500
+        const message = err.message || "Internal server error"
+        res.status(status).json({message});
+    } else {
+        res.status(500).json({message:"Internal server error"});
+    }
 }
 
 export default errorHandler

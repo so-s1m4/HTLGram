@@ -15,6 +15,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.27",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -22,6 +23,7 @@
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.0",
     "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"

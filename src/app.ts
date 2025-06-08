@@ -13,10 +13,14 @@ const limiter = rateLimit({
 app.use(limiter)
 app.use(cors())
 app.use(express.json())
+app.use(express.static('./public/photos'))
 
 import userRouter from './modules/users/users.routes'
 
-app.use('/api/users', userRouter)
+app.use('/api/users', (req, res, next) => {
+    console.log(req.url)
+    next()
+}, userRouter)
 
 import errorHandler from './common/middlewares/errorHandlerMiddleware'
 import notFound from './common/middlewares/notFoundMiddleware'

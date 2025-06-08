@@ -5,7 +5,7 @@ export const createUserSchema = Joi.object({
     password: Joi.string().trim().min(3).max(64).required(),
     name: Joi.string().trim().min(3).max(64).required(),
     description: Joi.string().trim().max(512), 
-    img: Joi.string(),
+    img: Joi.string()
 })
 
 export const loginUserSchema = Joi.object({

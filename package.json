@@ -27,5 +27,9 @@
     "mongoose": "^8.15.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@types/multer": "^1.4.13",
+    "multer": "^2.0.1"
   }
 }

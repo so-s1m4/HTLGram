@@ -9,7 +9,7 @@ dist/
 .DS_Store
 
 
-src/public/*
+public
 
 src/frontend/
 src/database.sqlite

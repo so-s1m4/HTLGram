@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import rateLimit from 'express-rate-limit'
+import path from 'path'
 
 const app = express()
 
@@ -10,10 +11,12 @@ const limiter = rateLimit({
     message: "Too many requests from this IP, please try again after 1 minutes"
 })
 
+export const publicDir = path.join(__dirname, '../public');
+
 app.use(limiter)
 app.use(cors())
 app.use(express.json())
-app.use(express.static('./public/photos'))
+app.use('/public', express.static(publicDir))
 
 import userRouter from './modules/users/users.routes'
 

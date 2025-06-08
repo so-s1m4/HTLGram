@@ -5,6 +5,8 @@ import { validationWrapper } from '../../common/utils/utils.wrappers'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware'
 
 export async function postRegisterUser(req: Request, res: Response, next: NextFunction) {
+    req.body = JSON.parse(req.body.data)
+    req.body.img = req.file?.filename || undefined
     const data = validationWrapper(createUserSchema, req.body || {})
     const user = await createUser(data)
     res.status(201).json({data: user})
@@ -24,7 +26,9 @@ export async function getUserData(req: Request, res: Response, next: NextFunctio
 }
 
 export async function patchUserData(req: Request, res: Response, next: NextFunction) {
+    req.body = JSON.parse(req.body.data)
     const userId = res.locals.user.userId
+    req.body.img = req.file?.filename || undefined
     const data = validationWrapper(updateUserSchema, req.body || {})
     const user = await updateUserData(userId, data)
     res.status(200).json({data:user})

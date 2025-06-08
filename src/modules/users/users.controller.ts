@@ -1,5 +1,5 @@
 import {createUserSchema, loginUserSchema, updateUserSchema} from './users.validation'
-import { createUser, loginUser, receiveUserData, updateUserData } from './users.service'
+import { createUser, deleteUserById, loginUser, receiveUserData, updateUserData } from './users.service'
 import {Request, Response, NextFunction} from 'express'
 import { validationWrapper } from '../../common/utils/utils.wrappers'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware'
@@ -32,4 +32,10 @@ export async function patchUserData(req: Request, res: Response, next: NextFunct
     const data = validationWrapper(updateUserSchema, req.body || {})
     const user = await updateUserData(userId, data)
     res.status(200).json({data:user})
+}
+
+export async function deleteUser(req: Request, res: Response, next: NextFunction) {
+    const userId = res.locals.user.userId
+    await deleteUserById(userId)
+    res.status(200).end()
 }

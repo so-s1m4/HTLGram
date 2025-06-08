@@ -34,3 +34,7 @@ export async function updateUserData(userId: Types.ObjectId, data: any) {
     const {password, ...userObject} = user.toObject()
     return userObject
 }
+
+export async function deleteUserById(userId: Types.ObjectId) {
+    await userModel.deleteOne({_id:userId})
+}

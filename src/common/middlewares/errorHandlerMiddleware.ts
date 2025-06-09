@@ -1,6 +1,6 @@
 import {Request, Response, NextFunction} from 'express'
-import path from 'path'
-import fs from 'fs'
+import deleteFile from '../utils/utils.deleteFile'
+import { MulterError } from 'multer'
 
 export class ErrorWithStatus extends Error {
     status?: number
@@ -15,16 +15,6 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
     console.log(err)
 
     // chat gpt
-    const deleteFile = (filename: string) => {
-        const filePath = path.join(__dirname, '../../../public', filename)
-        fs.unlink(filePath, unlinkErr => {
-            if (unlinkErr) {
-                console.error('File couldnt be deleted', unlinkErr)
-            }
-        })
-    }
-
-    // chat gpt
     if (req.file) {
         deleteFile(req.file.filename)
     }
@@ -37,10 +27,14 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
         filesArray.forEach(file => deleteFile(file.filename))
     }
 
+    
+
     if (err instanceof ErrorWithStatus) {
         const status = err.status || 500
         const message = err.message || "Internal server error"
         res.status(status).json({message});
+    } else if (err instanceof MulterError) {
+        res.status(400).json({ message: `Fail error: ${err.message}` })
     } else {
         res.status(500).json({message:"Internal server error"});
     }

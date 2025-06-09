@@ -5,6 +5,7 @@ import {ErrorWithStatus} from '../../common/middlewares/errorHandlerMiddleware'
 import jwt from 'jsonwebtoken'
 import { findUser } from "./users.utils"
 import { Types } from "mongoose"
+import deleteFile from "../../common/utils/utils.deleteFile"
 
 export async function createUser(data: UserI): Promise<any> {
     const oldUser = await userModel.findOne({username:data.username}).exec()
@@ -16,25 +17,54 @@ export async function createUser(data: UserI): Promise<any> {
 }
 
 export async function loginUser(data: any): Promise<string> {
-    const oldUser = await findUser({username:data.username})
+    const oldUser = await userModel.findOne({username:data.username}).select('+password').exec()
+    if (!oldUser) throw new ErrorWithStatus(400, "User was not found")
     if (!await bcrypt.compare(data.password, oldUser.password)) throw new ErrorWithStatus(400, "Password is false")
     return jwt.sign({userId: oldUser._id}, config.JWT_SECRET, {expiresIn: '7d'})
 }
 
 export async function receiveUserData(username: string): Promise<any> {
     const user = await findUser({username})
-    const {password, ...userObject} = user.toObject()
-    return userObject
+    return user.toObject()
+}
+
+export async function receiveMyData(userId: Types.ObjectId) {
+    const user = await findUser({_id:userId})
+    return user.toObject()
 }
 
 export async function updateUserData(userId: Types.ObjectId, data: any) {
     const user = await findUser({_id: userId})
+    if (data.password) data.password = await bcrypt.hash(data.password, config.PASSWORD_SALT)
     user.set(data)
     await user.save()
-    const {password, ...userObject} = user.toObject()
-    return userObject
+    return user.toObject()
 }
 
 export async function deleteUserById(userId: Types.ObjectId) {
     await userModel.deleteOne({_id:userId})
+}
+
+export async function receiveMyPhotos(userId: Types.ObjectId) {
+    const user = await findUser({_id:userId})
+    return user.toObject().img
+}
+
+export async function createMyPhoto(userId: Types.ObjectId, photoPath: string) {
+    const user = await findUser({_id:userId})
+    if (!user.img) user.img = []
+    if (user.img.length >= 20) throw new ErrorWithStatus(400, "You cant have more as 20 avatars")
+    user.img?.push(photoPath)
+    await user.save()
+    return user.toObject()
+}
+
+export async function deleteMyPhotoByPath(userId: Types.ObjectId, photoPath: string) {
+    const user = await findUser({_id:userId})
+    const idx = user.img?.findIndex((p) => p === photoPath);
+    if (idx === undefined || idx < 0) throw new ErrorWithStatus(404, 'Photo not found')
+    user.img!.splice(idx, 1);
+    deleteFile(photoPath)
+    await user.save()
+    return user.toObject()
 }

@@ -5,7 +5,7 @@ export interface UserI extends Document {
     password: string,
     name: string,
     description?: string, 
-    img?: string
+    img?: string[]
 }
 
 const userSchema = new Schema<UserI>({
@@ -16,7 +16,8 @@ const userSchema = new Schema<UserI>({
         },
         password: {
             type: String,
-            required: true
+            required: true,
+            select: false
         },
         name: {
             type: String,
@@ -26,7 +27,8 @@ const userSchema = new Schema<UserI>({
             type: String
         },
         img: {
-            type: String
+            type: [String],
+            maxlength: 20
         }
     },
     {

@@ -1,12 +1,10 @@
 import {createUserSchema, loginUserSchema, updateUserSchema} from './users.validation'
-import { createUser, deleteUserById, loginUser, receiveUserData, updateUserData } from './users.service'
+import { createMyPhoto, createUser, deleteMyPhotoByPath, deleteUserById, loginUser, receiveMyData, receiveMyPhotos, receiveUserData, updateUserData } from './users.service'
 import {Request, Response, NextFunction} from 'express'
 import { validationWrapper } from '../../common/utils/utils.wrappers'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware'
 
 export async function postRegisterUser(req: Request, res: Response, next: NextFunction) {
-    req.body = JSON.parse(req.body.data)
-    req.body.img = req.file?.filename || undefined
     const data = validationWrapper(createUserSchema, req.body || {})
     const user = await createUser(data)
     res.status(201).json({data: user})
@@ -25,10 +23,14 @@ export async function getUserData(req: Request, res: Response, next: NextFunctio
     res.status(200).json({data:user})
 }
 
-export async function patchUserData(req: Request, res: Response, next: NextFunction) {
-    req.body = JSON.parse(req.body.data)
+export async function getMyData(req: Request, res: Response, next: NextFunction) {
     const userId = res.locals.user.userId
-    req.body.img = req.file?.filename || undefined
+    const data = await receiveMyData(userId)
+    res.status(200).json({data})
+}
+
+export async function patchUserData(req: Request, res: Response, next: NextFunction) {
+    const userId = res.locals.user.userId
     const data = validationWrapper(updateUserSchema, req.body || {})
     const user = await updateUserData(userId, data)
     res.status(200).json({data:user})
@@ -38,4 +40,26 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
     const userId = res.locals.user.userId
     await deleteUserById(userId)
     res.status(200).end()
+}
+
+export async function getMyPhotos(req: Request, res: Response, next: NextFunction) {
+    const userId = res.locals.user.userId
+    const data = await receiveMyPhotos(userId)
+    res.status(200).json({data})
+}
+
+export async function postMyPhoto(req: Request, res: Response, next: NextFunction) {
+    const userId = res.locals.user.userId
+    const img = req.file?.filename || undefined
+    if (!img) throw new ErrorWithStatus(400, "Photo not found")
+    const data = await createMyPhoto(userId, img)
+    res.status(200).json({data})
+}
+
+export async function deleteMyPhoto(req: Request, res: Response, next: NextFunction) {
+    const userId = res.locals.user.userId
+    const img = req.params.photoPath
+    if (!img) throw new ErrorWithStatus(400, "Photo not found")
+    const data = await deleteMyPhotoByPath(userId, img)
+    res.status(200).json({data})
 }

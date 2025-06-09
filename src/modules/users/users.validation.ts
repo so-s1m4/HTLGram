@@ -4,8 +4,7 @@ export const createUserSchema = Joi.object({
     username: Joi.string().trim().min(3).max(64).required(),
     password: Joi.string().trim().min(3).max(64).required(),
     name: Joi.string().trim().min(3).max(64).required(),
-    description: Joi.string().trim().max(512), 
-    img: Joi.string()
+    description: Joi.string().trim().max(512)
 })
 
 export const loginUserSchema = Joi.object({
@@ -17,6 +16,5 @@ export const loginUserSchema = Joi.object({
 export const updateUserSchema = Joi.object({
     password: Joi.string().trim().min(3).max(64),
     name: Joi.string().trim().min(3).max(64),
-    description: Joi.string().trim().max(512), 
-    img: Joi.string()
+    description: Joi.string().trim().max(512)
 }).min(1)

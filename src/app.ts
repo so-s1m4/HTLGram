@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import rateLimit from 'express-rate-limit'
 import path from 'path'
+import fs from 'fs'
 
 const app = express()
 
@@ -12,6 +13,11 @@ const limiter = rateLimit({
 })
 
 export const publicDir = path.join(__dirname, '../public');
+
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
+  console.log(`Created missing directory: ${publicDir}`);
+}
 
 app.use(limiter)
 app.use(cors())

@@ -50,9 +50,8 @@ export async function getMyPhotos(req: Request, res: Response, next: NextFunctio
 
 export async function postMyPhoto(req: Request, res: Response, next: NextFunction) {
     const userId = res.locals.user.userId
-    const img = req.file?.filename || undefined
-    if (!img) throw new ErrorWithStatus(400, "Photo not found")
-    const data = await createMyPhoto(userId, img)
+    if (!req.file) throw new ErrorWithStatus(400, "Photo not found")
+    const data = await createMyPhoto(userId, req.file)
     res.status(200).json({data})
 }
 

@@ -50,19 +50,20 @@ export async function receiveMyPhotos(userId: Types.ObjectId) {
     return user.toObject().img
 }
 
-export async function createMyPhoto(userId: Types.ObjectId, photoPath: string) {
+export async function createMyPhoto(userId: Types.ObjectId, avatar: Express.Multer.File) {
     const user = await findUser({_id:userId})
-    if (!user.img) user.img = []
-    if (user.img.length >= 20) throw new ErrorWithStatus(400, "You cant have more as 20 avatars")
-    user.img?.push(photoPath)
+    if (user.storageUsed + avatar.size > 1024 * 1024 * 1024) throw new ErrorWithStatus(400, "Your cloude storage (1GB) is full")
+    user.img!.push({path: avatar.filename, size: avatar.size})
+    user.storageUsed += avatar.size
     await user.save()
     return user.toObject()
 }
 
 export async function deleteMyPhotoByPath(userId: Types.ObjectId, photoPath: string) {
     const user = await findUser({_id:userId})
-    const idx = user.img?.findIndex((p) => p === photoPath);
+    const idx = user.img?.findIndex((p) => p.path === photoPath);
     if (idx === undefined || idx < 0) throw new ErrorWithStatus(404, 'Photo not found')
+    user.storageUsed -= user.img![idx].size
     user.img!.splice(idx, 1);
     deleteFile(photoPath)
     await user.save()

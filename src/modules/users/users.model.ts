@@ -1,11 +1,27 @@
+import { number } from 'joi'
 import {Model, Schema, model} from 'mongoose'
+
+export interface ImageInfo {
+  path: string;
+  size: number;
+}
+
+const imageInfoSchema = new Schema(
+  {
+    path: { type: String, required: true },
+    size: { type: Number, required: true }
+  },
+  { _id: false }
+);
 
 export interface UserI extends Document {
     username: string,
     password: string,
     name: string,
     description?: string, 
-    img?: string[]
+    img?: ImageInfo[],
+    role: string[],
+    storageUsed: number
 }
 
 const userSchema = new Schema<UserI>({
@@ -27,8 +43,21 @@ const userSchema = new Schema<UserI>({
             type: String
         },
         img: {
+            type: [imageInfoSchema],
+            default: [],
+            validate: {
+                validator: arr => arr.length <= 20,
+                message: 'Cannot have more than 20 images'
+            }
+        },
+        role: {
             type: [String],
-            maxlength: 20
+            enum: ['user', 'moderator', 'admin'],
+            default: ['user']
+        },
+        storageUsed: {
+            type: Number,
+            default: 0
         }
     },
     {

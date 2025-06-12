@@ -1,4 +1,3 @@
-import { number } from 'joi'
 import {Model, Schema, model} from 'mongoose'
 
 export interface ImageInfo {
@@ -6,7 +5,7 @@ export interface ImageInfo {
   size: number;
 }
 
-const imageInfoSchema = new Schema(
+const imageInfoSchema = new Schema<ImageInfo>(
   {
     path: { type: String, required: true },
     size: { type: Number, required: true }

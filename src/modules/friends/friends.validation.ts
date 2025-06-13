@@ -1,13 +1,11 @@
 import joi from 'joi'
 
 export const createFriendRequestSchema = joi.object({
-    sender: joi.string().required(),
-    receiver: joi.string().required(),
-    status: joi.string().valid('sent', 'accepted', 'canceled').required()
+    receiver: joi.string().required()
 })
 
 export const updateFriendRequestSchema = joi.object({
-    status: joi.string().valid('sent', 'accepted', 'canceled').required()
+    status: joi.string().valid('accepted', 'canceled').required()
 })
 
 

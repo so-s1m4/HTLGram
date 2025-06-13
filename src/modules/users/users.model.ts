@@ -1,4 +1,4 @@
-import {Model, Schema, model} from 'mongoose'
+import {Model, Schema, model, Document, Types} from 'mongoose'
 
 export interface ImageInfo {
   path: string;
@@ -14,6 +14,7 @@ const imageInfoSchema = new Schema<ImageInfo>(
 );
 
 export interface UserI extends Document {
+    _id: Types.ObjectId,
     username: string,
     password: string,
     name: string,

@@ -1,5 +1,5 @@
 import {createUserSchema, loginUserSchema, updateUserSchema} from './users.validation'
-import { createMyPhoto, createUser, deleteMyPhotoByPath, deleteUserById, loginUser, receiveMyData, receiveMyPhotos, receiveUserData, updateUserData } from './users.service'
+import { createMyPhoto, createUser, deleteMyPhotoByPath, deleteUserById, loginUser, receiveMyData, receiveUserData, updateUserData } from './users.service'
 import {Request, Response, NextFunction} from 'express'
 import { validationWrapper } from '../../common/utils/utils.wrappers'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware'
@@ -42,11 +42,6 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
     res.status(200).end()
 }
 
-export async function getMyPhotos(req: Request, res: Response, next: NextFunction) {
-    const userId = res.locals.user.userId
-    const data = await receiveMyPhotos(userId)
-    res.status(200).json({data})
-}
 
 export async function postMyPhoto(req: Request, res: Response, next: NextFunction) {
     const userId = res.locals.user.userId

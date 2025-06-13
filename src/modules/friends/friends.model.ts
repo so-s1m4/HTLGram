@@ -1,8 +1,9 @@
-import mongoose, { Date, model, Model, Schema, Types } from "mongoose";
+import mongoose, { model, Model, Schema, Types, Document } from "mongoose";
 
 export type FriendRequestStatus = "sent" | "accepted" | "canceled"
 
 export interface FriendRequestI extends Document {
+    _id: Types.ObjectId,
     sender: Types.ObjectId,
     receiver: Types.ObjectId,
     status: FriendRequestStatus

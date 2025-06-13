@@ -3,9 +3,9 @@ import bcrypt from 'bcryptjs'
 import {config} from '../../config/config'
 import {ErrorWithStatus} from '../../common/middlewares/errorHandlerMiddleware'
 import jwt from 'jsonwebtoken'
-import { findUser } from "./users.utils"
 import { Types } from "mongoose"
 import deleteFile from "../../common/utils/utils.deleteFile"
+import { findUser } from "common/utils/utils.findModel"
 
 export async function createUser(data: UserI): Promise<any> {
     const oldUser = await userModel.findOne({username:data.username}).exec()
@@ -45,10 +45,6 @@ export async function deleteUserById(userId: Types.ObjectId) {
     await userModel.deleteOne({_id:userId})
 }
 
-export async function receiveMyPhotos(userId: Types.ObjectId) {
-    const user = await findUser({_id:userId})
-    return user.toObject().img
-}
 
 export async function createMyPhoto(userId: Types.ObjectId, avatar: Express.Multer.File) {
     const user = await findUser({_id:userId})

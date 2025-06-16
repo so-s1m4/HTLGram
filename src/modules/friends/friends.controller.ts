@@ -7,7 +7,7 @@ import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware
 export async function postFriendRequest(req: Request, res: Response, next: NextFunction) {
     const userId = res.locals.user.userId
     const data = validationWrapper(createFriendRequestSchema, req.body || {})
-    const friendRequest = await createFriendRequest(userId, data.receiver)
+    const friendRequest = await createFriendRequest(userId, data.receiver, data.text)
     res.status(201).json({data: friendRequest})
 } 
 

@@ -1,13 +1,13 @@
 import express from 'express'
 import { patchFriendRequest, postFriendRequest } from './friends.controller'
-import { ErrorWrapper } from 'common/utils/utils.wrappers'
-import JWTMiddleware from 'common/middlewares/JWTMiddleware'
+import { ErrorWrapper } from '../../common/utils/utils.wrappers'
+import JWTMiddleware from '../../common/middlewares/JWTMiddleware'
 
 const router = express.Router()
 
 router.post('/', JWTMiddleware, ErrorWrapper(postFriendRequest))
 router.patch('/:requestId', JWTMiddleware, ErrorWrapper(patchFriendRequest))
-router.get('/')
-router.delete('/:requestId')
+// router.get('/')
+// router.delete('/:requestId')
 
 export default router

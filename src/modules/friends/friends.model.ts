@@ -6,7 +6,8 @@ export interface FriendRequestI extends Document {
     _id: Types.ObjectId,
     sender: Types.ObjectId,
     receiver: Types.ObjectId,
-    status: FriendRequestStatus
+    status: FriendRequestStatus,
+    text: string,
     createdAt: Date,
     updatedAt: Date
 }
@@ -27,6 +28,11 @@ const friendRequestSchema = new Schema<FriendRequestI>({
       enum: ["sent", "accepted", "canceled"],
       default: "sent",
       required: true
+    },
+    text: {
+        type: String,
+        default: "",
+        required: true
     }
 }, {
     timestamps: true

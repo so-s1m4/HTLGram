@@ -6,7 +6,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "docker:build": "docker build -t hltgram .",
+    "compose:up":   "docker-compose up -d",
+    "compose:down": "docker-compose down",
+    "logs":         "docker-compose logs -f"
   },
   "keywords": [],
   "author": "",

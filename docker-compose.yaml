@@ -1,0 +1,25 @@
+version: '3'
+services:
+  hltgram-app:
+    image: hltgram
+    ports: 
+      - "8000:8000"
+    volumes:
+      - public-data:/var/lib/htlgram/public
+    environment: 
+      - PORT=8000
+      - JWT_SECRET=secret
+      - MONGO_URI=mongodb://leuzery:qwerty@mongodb:27017
+      - PASSWORD_SALT=5
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: leuzery
+      MONGO_INITDB_ROOT_PASSWORD: qwerty
+    volumes:
+      - mongodb-data:/var/lib/mysql/data
+volumes:
+  mongodb-data:
+  public-data:

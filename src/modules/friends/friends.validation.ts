@@ -1,7 +1,8 @@
 import joi from 'joi'
 
 export const createFriendRequestSchema = joi.object({
-    receiver: joi.string().required()
+    receiver: joi.string().required(),
+    text: joi.string()
 })
 
 export const updateFriendRequestSchema = joi.object({

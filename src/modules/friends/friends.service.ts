@@ -35,6 +35,22 @@ export async function receiveFriendRequests(status: FriendRequestStatus, user_id
     const requests = await friendRequestModel.find({$or: [
         { receiver: user_id },
         { sender:   user_id }
-      ], status})
+      ], status}).exec()
     return requests
+}
+
+export async function removeFriendRequest(user_id: Types.ObjectId, request_id: string) {
+    const deleted = await friendRequestModel.findOneAndDelete({
+    _id: request_id,
+    $or: [
+      { receiver: user_id },
+      { sender:   user_id }
+    ]
+  }).exec();
+
+  if (!deleted) {
+    throw new ErrorWithStatus(404, 'Friend request not found or access denied');
+  }
+
+  return deleted
 }

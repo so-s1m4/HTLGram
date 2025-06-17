@@ -1,7 +1,7 @@
 import { validationWrapper } from "../../common/utils/utils.wrappers";
 import { Request, Response, NextFunction } from "express";
 import { createFriendRequestSchema, getFriendRequestSchema, updateFriendRequestSchema } from "./friends.validation";
-import { createFriendRequest, receiveFriendRequests, updateFriendRequest } from "./friends.service";
+import { createFriendRequest, receiveFriendRequests, removeFriendRequest, updateFriendRequest } from "./friends.service";
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware";
 
 export async function postFriendRequest(req: Request, res: Response, next: NextFunction) {
@@ -25,4 +25,12 @@ export async function getFriendRequests(req: Request, res: Response, next: NextF
     const data = validationWrapper(getFriendRequestSchema, req.query || {})
     const friendRequests = await receiveFriendRequests(data.status, userId)
     res.status(200).json({data: friendRequests})
+}
+
+export async function deleteFriendRequest(req: Request, res: Response, next: NextFunction) {
+    const userId = res.locals.user.userId
+    const requestId = req.params['requestId']
+    if (!requestId) throw new ErrorWithStatus(400, "'requestId' in params is missing")
+    const deleted = await removeFriendRequest(userId, requestId)
+    res.status(200).json({data: deleted})
 }

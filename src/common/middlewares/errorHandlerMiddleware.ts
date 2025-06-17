@@ -1,6 +1,7 @@
 import {Request, Response, NextFunction} from 'express'
 import deleteFile from '../utils/utils.deleteFile'
 import { MulterError } from 'multer'
+import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken'
 
 export class ErrorWithStatus extends Error {
     status?: number
@@ -35,6 +36,10 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
         res.status(status).json({message});
     } else if (err instanceof MulterError) {
         res.status(400).json({ message: `Fail error: ${err.message}` })
+    } else if (err instanceof TokenExpiredError) {
+        res.status(401).json({ message: `Token expired: ${err.message}` });
+    } else if (err instanceof JsonWebTokenError) {
+        res.status(401).json({ message: `Invalid token: ${err.message}` });
     } else {
         res.status(500).json({message:"Internal server error"});
     }

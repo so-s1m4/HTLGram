@@ -9,7 +9,7 @@ export async function createFriendRequest(user_id: Types.ObjectId, receiver_user
     if (sender._id.equals(receiver._id)) throw new ErrorWithStatus(400, "You cant send request to yourself")
     const friendRequest = await friendRequestModel.findOne({sender: sender._id, receiver: receiver._id})
     if (!friendRequest) {
-        return await friendRequestModel.create({sender: sender._id, receiver: receiver._id, text: text||""})
+        return await friendRequestModel.create({sender: sender._id, sender_username: sender.username, receiver: receiver._id, receiver_username: receiver.username, text: text||""})
     } else if (friendRequest.status == 'canceled') {
         friendRequest.status = 'sent'
         if (text) friendRequest.text = text
@@ -29,4 +29,12 @@ export async function updateFriendRequest(request_id: string, user_id: Types.Obj
     friendRequest.status = status
     await friendRequest.save()
     return friendRequest
+}
+
+export async function receiveFriendRequests(status: FriendRequestStatus, user_id: Types.ObjectId) {
+    const requests = await friendRequestModel.find({$or: [
+        { receiver: user_id },
+        { sender:   user_id }
+      ], status})
+    return requests
 }

@@ -1,7 +1,7 @@
 import { validationWrapper } from "../../common/utils/utils.wrappers";
 import { Request, Response, NextFunction } from "express";
-import { createFriendRequestSchema, updateFriendRequestSchema } from "./friends.validation";
-import { createFriendRequest, updateFriendRequest } from "./friends.service";
+import { createFriendRequestSchema, getFriendRequestSchema, updateFriendRequestSchema } from "./friends.validation";
+import { createFriendRequest, receiveFriendRequests, updateFriendRequest } from "./friends.service";
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware";
 
 export async function postFriendRequest(req: Request, res: Response, next: NextFunction) {
@@ -18,4 +18,11 @@ export async function patchFriendRequest(req: Request, res: Response, next: Next
     const data = validationWrapper(updateFriendRequestSchema, req.body || {})
     const updated = await updateFriendRequest(requestId, userId, data.status)
     res.status(200).json({data: updated})
+}
+
+export async function getFriendRequests(req: Request, res: Response, next: NextFunction) {
+    const userId = res.locals.user.userId
+    const data = validationWrapper(getFriendRequestSchema, req.query || {})
+    const friendRequests = await receiveFriendRequests(data.status, userId)
+    res.status(200).json({data: friendRequests})
 }

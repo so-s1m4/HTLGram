@@ -1,5 +1,11 @@
 import Joi from 'joi'
 
+export const receiveUsersSchema = Joi.object({
+    startsWith: Joi.string().trim().min(1).max(64).required(),
+    offSet: Joi.number().min(0).default(0),
+    limit: Joi.number().min(0).default(10)
+})
+
 export const createUserSchema = Joi.object({
     username: Joi.string().trim().min(3).max(64).required(),
     password: Joi.string().trim().min(3).max(64).required(),
@@ -11,7 +17,6 @@ export const loginUserSchema = Joi.object({
     username: Joi.string().trim().min(3).max(64).required(),
     password: Joi.string().trim().min(3).max(64).required(),
 })
-
 
 export const updateUserSchema = Joi.object({
     password: Joi.string().trim().min(3).max(64),

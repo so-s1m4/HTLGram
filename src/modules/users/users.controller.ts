@@ -1,8 +1,14 @@
-import {createUserSchema, loginUserSchema, updateUserSchema} from './users.validation'
-import { createMyPhoto, createUser, deleteMyPhotoByPath, deleteUserById, loginUser, receiveMyData, receiveUserData, updateUserData } from './users.service'
+import {createUserSchema, loginUserSchema, receiveUsersSchema, updateUserSchema} from './users.validation'
+import { createMyPhoto, createUser, deleteMyPhotoByPath, deleteUserById, loginUser, receiveMyData, receiveUserData, receiveUsersData, updateUserData } from './users.service'
 import {Request, Response, NextFunction} from 'express'
 import { validationWrapper } from '../../common/utils/utils.wrappers'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware'
+
+export async function getUsersData(req: Request, res: Response, next: NextFunction) {
+    const data = validationWrapper(receiveUsersSchema, req.query || {})
+    const users = await receiveUsersData(data)
+    res.status(201).json({data: users})
+}
 
 export async function postRegisterUser(req: Request, res: Response, next: NextFunction) {
     const data = validationWrapper(createUserSchema, req.body || {})

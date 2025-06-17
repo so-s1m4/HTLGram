@@ -5,7 +5,14 @@ import {ErrorWithStatus} from '../../common/middlewares/errorHandlerMiddleware'
 import jwt from 'jsonwebtoken'
 import { Types } from "mongoose"
 import deleteFile from "../../common/utils/utils.deleteFile"
-import { findUser } from "../../common/utils/utils.findModel"
+import { findUserUtil } from "../../common/utils/utils.findModel"
+
+export async function receiveUsersData(data:any) {
+    return await userModel.find({ username: new RegExp(`^${data.startsWith}`, 'i') } )
+    .limit(data.limit)
+    .skip(data.offSet)
+    .exec()
+}
 
 export async function createUser(data: UserI): Promise<any> {
     const oldUser = await userModel.findOne({username:data.username}).exec()
@@ -24,17 +31,17 @@ export async function loginUser(data: any): Promise<string> {
 }
 
 export async function receiveUserData(username: string): Promise<any> {
-    const user = await findUser({username})
+    const user = await findUserUtil({username})
     return user.toObject()
 }
 
 export async function receiveMyData(userId: Types.ObjectId) {
-    const user = await findUser({_id:userId})
+    const user = await findUserUtil({_id:userId})
     return user.toObject()
 }
 
 export async function updateUserData(userId: Types.ObjectId, data: any) {
-    const user = await findUser({_id: userId})
+    const user = await findUserUtil({_id: userId})
     if (data.password) data.password = await bcrypt.hash(data.password, config.PASSWORD_SALT)
     user.set(data)
     await user.save()
@@ -47,7 +54,7 @@ export async function deleteUserById(userId: Types.ObjectId) {
 
 
 export async function createMyPhoto(userId: Types.ObjectId, avatar: Express.Multer.File) {
-    const user = await findUser({_id:userId})
+    const user = await findUserUtil({_id:userId})
     if (user.storageUsed + avatar.size > 1024 * 1024 * 1024) throw new ErrorWithStatus(400, "Your cloude storage (1GB) is full")
     user.img!.push({path: avatar.filename, size: avatar.size})
     user.storageUsed += avatar.size
@@ -56,7 +63,7 @@ export async function createMyPhoto(userId: Types.ObjectId, avatar: Express.Mult
 }
 
 export async function deleteMyPhotoByPath(userId: Types.ObjectId, photoPath: string) {
-    const user = await findUser({_id:userId})
+    const user = await findUserUtil({_id:userId})
     const idx = user.img!.findIndex((p) => p.path === photoPath);
     if (idx === undefined || idx < 0) throw new ErrorWithStatus(404, 'Photo not found')
     user.storageUsed -= user.img![idx].size

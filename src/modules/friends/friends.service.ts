@@ -7,15 +7,15 @@ export async function createFriendRequest(user_id: Types.ObjectId, receiver_user
     const sender = await findUserUtil({_id: user_id})
     const receiver = await findUserUtil({username: receiver_username})
     if (sender._id.equals(receiver._id)) throw new ErrorWithStatus(400, "You cant send request to yourself")
-    const friendRequest = await friendRequestModel.findOne({sender: sender._id, receiver: receiver._id})
+    const friendRequest = await friendRequestModel.findOne({$or: [{sender: sender._id, receiver: receiver._id}, {sender: receiver._id, receiver: sender._id}]})    
     if (!friendRequest) {
         return await friendRequestModel.create({sender: sender._id, sender_username: sender.username, receiver: receiver._id, receiver_username: receiver.username, text: text||""})
-    } else if (friendRequest.status == 'canceled') {
+    } else if (friendRequest.status === 'canceled') {
         friendRequest.status = 'sent'
         if (text) friendRequest.text = text
         await friendRequest.save()
         return friendRequest
-    } else if (friendRequest.status == 'accepted') {
+    } else if (friendRequest.status === 'accepted') {
         throw new ErrorWithStatus(400, `${receiver_username} is already your friend`)
     } else {
         throw new ErrorWithStatus(400, `Friend-request was already sent`)

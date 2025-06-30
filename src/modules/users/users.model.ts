@@ -21,7 +21,8 @@ export interface UserI extends Document {
     description?: string, 
     img?: ImageInfo[],
     role: string[],
-    storageUsed: number
+    storageUsed: number,
+    friends: string[]
 }
 
 const userSchema = new Schema<UserI>({
@@ -58,6 +59,10 @@ const userSchema = new Schema<UserI>({
         storageUsed: {
             type: Number,
             default: 0
+        },
+        friends: {
+            type: [String],
+            default: []
         }
     },
     {

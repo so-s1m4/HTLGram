@@ -4,9 +4,9 @@ export type FriendRequestStatus = "sent" | "accepted" | "canceled"
 
 export interface FriendRequestI extends Document {
     _id: Types.ObjectId,
-    sender: Types.ObjectId,
+    sender_id: Types.ObjectId,
     sender_username: string,
-    receiver: Types.ObjectId,
+    receiver_id: Types.ObjectId,
     receiver_username: string,
     status: FriendRequestStatus,
     text: string,
@@ -15,7 +15,7 @@ export interface FriendRequestI extends Document {
 }
 
 const friendRequestSchema = new Schema<FriendRequestI>({
-    sender: {
+    sender_id: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true
@@ -24,7 +24,7 @@ const friendRequestSchema = new Schema<FriendRequestI>({
         type: String,
         required: true
     },
-    receiver: {
+    receiver_id: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true

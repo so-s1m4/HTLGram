@@ -6,28 +6,36 @@ import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware
 export async function createFriendRequest(user_id: Types.ObjectId, receiver_username: string, text: string) {
     const sender = await findUserUtil({_id: user_id})
     const receiver = await findUserUtil({username: receiver_username})
+    const idx = sender.friends.findIndex(f => f === receiver_username);
+    if (idx !== -1) throw new ErrorWithStatus(400, `${receiver_username} is already your friend`)
     if (sender._id.equals(receiver._id)) throw new ErrorWithStatus(400, "You cant send request to yourself")
     const friendRequest = await friendRequestModel.findOne({$or: [{sender: sender._id, receiver: receiver._id}, {sender: receiver._id, receiver: sender._id}]})    
     if (!friendRequest) {
         return await friendRequestModel.create({sender: sender._id, sender_username: sender.username, receiver: receiver._id, receiver_username: receiver.username, text: text||""})
-    } else if (friendRequest.status === 'canceled') {
+    } else if (friendRequest.status === 'canceled' || friendRequest.status === 'accepted') {
         friendRequest.status = 'sent'
         if (text) friendRequest.text = text
         await friendRequest.save()
         return friendRequest
-    } else if (friendRequest.status === 'accepted') {
-        throw new ErrorWithStatus(400, `${receiver_username} is already your friend`)
     } else {
         throw new ErrorWithStatus(400, `Friend-request was already sent`)
     }
 }
 
 export async function updateFriendRequest(request_id: string, user_id: Types.ObjectId, status: FriendRequestStatus) {
-    const friendRequest = await findFriendRequestUtil({_id:request_id})
+    const friendRequest = await findFriendRequestUtil({_id:request_id, status: 'sent', receiver_id:user_id})
     const user = await findUserUtil({_id: user_id})
-    if (!friendRequest.receiver.equals(user_id)) throw new ErrorWithStatus(400, "You didn't get this request")
+    if (!friendRequest) throw new ErrorWithStatus(400, "Friend request not found")
     friendRequest.status = status
     await friendRequest.save()
+    if (status === "accepted") {
+        const user1 = await findUserUtil({_id:friendRequest.sender_id})
+        const user2 = await findUserUtil({_id:friendRequest.receiver_id})
+        user1.friends.push(user2.username)
+        user2.friends.push(user1.username)
+        await user1.save()
+        await user2.save()
+    }
     return friendRequest
 }
 
@@ -46,11 +54,11 @@ export async function removeFriendRequest(user_id: Types.ObjectId, request_id: s
       { receiver: user_id },
       { sender:   user_id }
     ]
-  }).exec();
+    }).exec();
 
-  if (!deleted) {
-    throw new ErrorWithStatus(404, 'Friend request not found or access denied');
-  }
+    if (!deleted) {
+      throw new ErrorWithStatus(404, 'Friend request not found or access denied');
+    }
 
-  return deleted
-}
+    return deleted
+}   

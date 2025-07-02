@@ -1,5 +1,5 @@
 import {createUserSchema, loginUserSchema, receiveUsersSchema, updateUserSchema} from './users.validation'
-import { createMyPhoto, createUser, deleteMyPhotoByPath, deleteUserById, loginUser, receiveMyData, receiveUserData, receiveUsersData, updateUserData } from './users.service'
+import { createMyPhoto, createUser, deleteFriendByUsername, deleteMyPhotoByPath, deleteUserById, loginUser, receiveFriends, receiveMyData, receiveUserData, receiveUsersData, updateUserData } from './users.service'
 import {Request, Response, NextFunction} from 'express'
 import { validationWrapper } from '../../common/utils/utils.wrappers'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware'
@@ -62,4 +62,19 @@ export async function deleteMyPhoto(req: Request, res: Response, next: NextFunct
     if (!img) throw new ErrorWithStatus(400, "Photo not found")
     const data = await deleteMyPhotoByPath(userId, img)
     res.status(200).json({data})
+}
+
+
+export async function getFriends(req: Request, res: Response, next: NextFunction) {
+    const userId = res.locals.user.userId
+    const data = await receiveFriends(userId)
+    res.status(200).json({data})
+}
+
+export async function deleteFriend(req: Request, res: Response, next: NextFunction) {
+    const userId = res.locals.user.userId
+    const friendUsername = req.body.username
+    if (!friendUsername) throw new ErrorWithStatus(400, "friendUsername is required")
+    await deleteFriendByUsername(userId, friendUsername)
+    res.status(200)
 }

@@ -19,7 +19,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: leuzery
       MONGO_INITDB_ROOT_PASSWORD: qwerty
     volumes:
-      - mongodb-data:/var/lib/mysql/data
+      - mongodb-data:/data/db
 volumes:
   mongodb-data:
   public-data:

@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import {config} from '../../config/config'
 import {ErrorWithStatus} from '../../common/middlewares/errorHandlerMiddleware'
 import jwt from 'jsonwebtoken'
-import { Types } from "mongoose"
+import mongoose, { Types } from "mongoose"
 import deleteFile from "../../common/utils/utils.deleteFile"
 import { findUserUtil } from "../../common/utils/utils.findModel"
 
@@ -71,4 +71,37 @@ export async function deleteMyPhotoByPath(userId: Types.ObjectId, photoPath: str
     deleteFile(photoPath)
     await user.save()
     return user.toObject()
+}
+
+export async function receiveFriends(userId: Types.ObjectId) {
+    const user = await userModel.findOne({_id: userId}).select("+friends").exec()
+    if (!user) throw new ErrorWithStatus(404, 'User was not found');
+    return user.friends
+}
+
+export async function deleteFriendByUsername(userId: Types.ObjectId, friendUsername: string) {
+    // const session = await mongoose.startSession();
+    // try {
+    //     session.startTransaction();
+    //     const user = await findUserUtil({_id:userId}, {session})
+    //     const friend = await findUserUtil({username:friendUsername}, {session})
+    //     if (user.friends.findIndex(f => f === friendUsername) === -1) throw new ErrorWithStatus(404, "Friend not found")
+    //     user.friends.pull(friend.username)
+    //     friend.friends.pull(user.username);
+    //     await user.save({ session });
+    //     await friend.save({ session });
+    //     await session.commitTransaction();
+    // } catch (err) {
+    //     await session.abortTransaction();
+    //     throw err;
+    // } finally {
+    //     session.endSession();
+    // }
+    const user = await findUserUtil({_id:userId})
+    const friend = await findUserUtil({username:friendUsername})
+    if (user.friends.findIndex(f => f === friendUsername) === -1) throw new ErrorWithStatus(404, "Friend not found")
+    user.friends.pull(friend.username)
+    friend.friends.pull(user.username);
+    await user.save();
+    await friend.save();
 }

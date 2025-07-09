@@ -1,5 +1,5 @@
 import express from 'express'
-import { deleteFriend, deleteMyPhoto, deleteUser, getFriends, getMyData, getUserData, getUsersData, patchUserData, postLoginUser, postMyPhoto, postRegisterUser } from './users.controller'
+import { deleteFriend, deleteMyPhoto, getFriends, getMyData, getUserData, getUsersData, patchUserData, postLoginUser, postMyPhoto, postRegisterUser } from './users.controller'
 import { ErrorWrapper } from '../../common/utils/utils.wrappers'
 import JWTMiddleware from '../../common/middlewares/JWTMiddleware'
 import { upload } from '../../common/multer/multer.photo'
@@ -11,7 +11,6 @@ router.post('/register', ErrorWrapper(postRegisterUser))
 router.post('/login', ErrorWrapper(postLoginUser))
 router.get('/me', JWTMiddleware, ErrorWrapper(getMyData))
 router.patch('/me', JWTMiddleware, ErrorWrapper(patchUserData))
-router.delete('/me', JWTMiddleware, ErrorWrapper(deleteUser))
 router.get('/me/friends', JWTMiddleware, ErrorWrapper(getFriends))
 router.delete('/me/friends', JWTMiddleware, ErrorWrapper(deleteFriend))
 router.post('/me/photos', JWTMiddleware, upload.single('photo'), ErrorWrapper(postMyPhoto))

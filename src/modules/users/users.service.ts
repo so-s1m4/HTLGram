@@ -3,9 +3,9 @@ import bcrypt from 'bcryptjs'
 import {config} from '../../config/config'
 import {ErrorWithStatus} from '../../common/middlewares/errorHandlerMiddleware'
 import jwt from 'jsonwebtoken'
-import mongoose, { Types } from "mongoose"
+import mongoose, { Schema, Types } from "mongoose"
 import deleteFile from "../../common/utils/utils.deleteFile"
-import { findUserUtil } from "../../common/utils/utils.findModel"
+import { friendModel } from "modules/friends/friends.model"
 
 export async function receiveUsersData(data:any) {
     return await userModel.find({ username: new RegExp(`^${data.startsWith}`, 'i') } )
@@ -31,77 +31,57 @@ export async function loginUser(data: any): Promise<string> {
 }
 
 export async function receiveUserData(username: string): Promise<any> {
-    const user = await findUserUtil({username})
+    const user = await userModel.findOneOrError({username})
     return user.toObject()
 }
 
 export async function receiveMyData(userId: Types.ObjectId) {
-    const user = await findUserUtil({_id:userId})
+    const user = await userModel.findOneOrError({_id:userId})
     return user.toObject()
 }
 
 export async function updateUserData(userId: Types.ObjectId, data: any) {
-    const user = await findUserUtil({_id: userId})
+    const user = await userModel.findOneOrError({_id: userId})
     if (data.password) data.password = await bcrypt.hash(data.password, config.PASSWORD_SALT)
     user.set(data)
     await user.save()
     return user.toObject()
 }
 
-export async function deleteUserById(userId: Types.ObjectId) {
-    await userModel.deleteOne({_id:userId})
-}
-
-
 export async function createMyPhoto(userId: Types.ObjectId, avatar: Express.Multer.File) {
-    const user = await findUserUtil({_id:userId})
-    if (user.storageUsed + avatar.size > 1024 * 1024 * 1024) throw new ErrorWithStatus(400, "Your cloude storage (1GB) is full")
-    user.img!.push({path: avatar.filename, size: avatar.size})
-    user.storageUsed += avatar.size
+    const user = await userModel.findOneOrError({_id:userId})
+    user.img.push({path: avatar.filename, size: avatar.size})
     await user.save()
     return user.toObject()
 }
 
 export async function deleteMyPhotoByPath(userId: Types.ObjectId, photoPath: string) {
-    const user = await findUserUtil({_id:userId})
-    const idx = user.img!.findIndex((p) => p.path === photoPath);
+    const user = await userModel.findOneOrError({_id:userId})
+    const idx = user.img.findIndex((p) => p.path === photoPath);
     if (idx === undefined || idx < 0) throw new ErrorWithStatus(404, 'Photo not found')
-    user.storageUsed -= user.img![idx].size
-    user.img!.splice(idx, 1);
+    user.img.splice(idx, 1);
     deleteFile(photoPath)
     await user.save()
     return user.toObject()
 }
 
 export async function receiveFriends(userId: Types.ObjectId) {
-    const user = await userModel.findOne({_id: userId}).select("+friends").exec()
-    if (!user) throw new ErrorWithStatus(404, 'User was not found');
-    return user.friends
+    const friends = await friendModel.find({
+        $or: [{user1_id: userId}, {user2_id: userId}]
+    })
+    return friends
 }
 
 export async function deleteFriendByUsername(userId: Types.ObjectId, friendUsername: string) {
-    // const session = await mongoose.startSession();
-    // try {
-    //     session.startTransaction();
-    //     const user = await findUserUtil({_id:userId}, {session})
-    //     const friend = await findUserUtil({username:friendUsername}, {session})
-    //     if (user.friends.findIndex(f => f === friendUsername) === -1) throw new ErrorWithStatus(404, "Friend not found")
-    //     user.friends.pull(friend.username)
-    //     friend.friends.pull(user.username);
-    //     await user.save({ session });
-    //     await friend.save({ session });
-    //     await session.commitTransaction();
-    // } catch (err) {
-    //     await session.abortTransaction();
-    //     throw err;
-    // } finally {
-    //     session.endSession();
-    // }
-    const user = await findUserUtil({_id:userId})
-    const friend = await findUserUtil({username:friendUsername})
-    if (user.friends.findIndex(f => f === friendUsername) === -1) throw new ErrorWithStatus(404, "Friend not found")
-    user.friends.pull(friend.username)
-    friend.friends.pull(user.username);
-    await user.save();
-    await friend.save();
+    const user1= await userModel.findOneOrError({_id:userId})
+    const user2 = await userModel.findOneOrError({username:friendUsername})
+
+    const friend = await friendModel.deleteOne({
+        $or: [{user1_id: user1._id, user2_id: user2._id}, {user2_id: user1._id, user1_id: user2._id}]
+    })
+
+    user1.friendsCount -= 1
+    await user1.save();
+    user2.friendsCount -= 1
+    await user2.save();
 }

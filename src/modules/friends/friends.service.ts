@@ -1,68 +1,42 @@
-import mongoose, { Types } from 'mongoose';
+import { Schema, Types } from 'mongoose';
 import {friendRequestModel, FriendRequestStatus} from './friends.model'
-import { findFriendRequestUtil, findUserUtil } from '../../common/utils/utils.findModel';
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware';
+import { userModel } from 'modules/users/users.model';
+import { friendModel } from './friends.model';
 
 export async function createFriendRequest(user_id: Types.ObjectId, receiver_username: string, text: string) {
-    const sender = await findUserUtil({_id: user_id})
-    const receiver = await findUserUtil({username: receiver_username})
-    const idx = sender.friends.findIndex(f => f === receiver_username);
-    if (idx !== -1) throw new ErrorWithStatus(400, `${receiver_username} is already your friend`)
-    if (sender._id.equals(receiver._id)) throw new ErrorWithStatus(400, "You cant send request to yourself")
+    const sender = await userModel.findOneOrError({_id: user_id})
+    const receiver = await userModel.findOneOrError({username: receiver_username})
+    const friend = await friendModel.findOne({
+        $or: [{user1_id: sender._id, user2_id: receiver._id}, {user2_id: sender._id, user1_id: receiver._id}]
+    }).exec()
+    if (friend) throw new ErrorWithStatus(400, `${receiver_username} is already your friend`)
+    if (sender._id == receiver._id) throw new ErrorWithStatus(400, "You cant send request to yourself")
     const friendRequest = await friendRequestModel.findOne({$or: [{sender_id: sender._id, receiver_id: receiver._id}, {sender_id: receiver._id, receiver_id: sender._id}]})    
     if (!friendRequest) {
         return await friendRequestModel.create({sender_id: sender._id, sender_username: sender.username, receiver_id: receiver._id, receiver_username: receiver.username, text: text||""})
     } else if (friendRequest.status === 'canceled' || friendRequest.status === 'accepted') {
-        friendRequest.status = 'sent'
-        if (text) friendRequest.text = text
-        await friendRequest.save()
-        return friendRequest
+        await friendRequest.deleteOne()
+        return await friendRequestModel.create({sender_id: sender._id, sender_username: sender.username, receiver_id: receiver._id, receiver_username: receiver.username, text: text||""})
     } else {
         throw new ErrorWithStatus(400, `Friend-request was already sent`)
     }
 }
 
 export async function updateFriendRequest(request_id: string, user_id: Types.ObjectId, status: FriendRequestStatus) {
-    const friendRequest = await findFriendRequestUtil({_id:request_id, status: 'sent', receiver_id:user_id})
-    const user = await findUserUtil({_id: user_id})
-    if (!friendRequest) throw new ErrorWithStatus(400, "Friend request not found")
+    const user = await userModel.findOneOrError({_id: user_id})
+    const friendRequest = await friendRequestModel.findOneOrError({_id:request_id, status: 'sent', receiver_id:user_id})
     friendRequest.status = status
     await friendRequest.save()
     if (status === "accepted") {
-        // const session = await mongoose.startSession();
-        // try {
-        //     session.startTransaction();
+        const user1 = await userModel.findOneOrError({ _id: friendRequest.sender_id });
+        const user2 = await userModel.findOneOrError( { _id: friendRequest.receiver_id });
 
-        //     const user1 = await findUserUtil(
-        //     { _id: friendRequest.sender_id },
-        //     { session }
-        //     );
-        //     const user2 = await findUserUtil(
-        //     { _id: friendRequest.receiver_id },
-        //     { session }
-        //     );
+        await friendModel.create({user1_id: user1._id, user2_id: user2._id})
 
-        //     user1.friends.push(user2.username);
-        //     user2.friends.push(user1.username);
-
-        //     await user1.save({ session });
-        //     await user2.save({ session });
-
-        //     await session.commitTransaction();
-        // } catch (err) {
-        //     await session.abortTransaction();
-        //     throw err;
-        // } finally {
-        //     session.endSession();
-        // }
-
-        const user1 = await findUserUtil({ _id: friendRequest.sender_id });
-        const user2 = await findUserUtil( { _id: friendRequest.receiver_id });
-
-        user1.friends.push(user2.username);
-        user2.friends.push(user1.username);
-
+        user1.friendsCount += 1;
         await user1.save();
+        user2.friendsCount += 1;
         await user2.save();
     }
     return friendRequest

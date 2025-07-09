@@ -1,11 +1,12 @@
-import {Model, Schema, model, Document, Types} from 'mongoose'
+import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware';
+import {Model, Schema, model, Types, HydratedDocument} from 'mongoose'
 
-export interface ImageInfo {
+export interface ImageInfoI {
   path: string;
   size: number;
 }
 
-const imageInfoSchema = new Schema<ImageInfo>(
+const imageInfoSchema = new Schema<ImageInfoI>(
   {
     path: { type: String, required: true },
     size: { type: Number, required: true }
@@ -13,19 +14,23 @@ const imageInfoSchema = new Schema<ImageInfo>(
   { _id: false }
 );
 
-export interface UserI extends Document {
-    _id: Types.ObjectId,
-    username: string,
+export interface UserI {
+    _id: Schema.Types.ObjectId,
+    username: string
     password: string,
     name: string,
     description?: string, 
-    img?: ImageInfo[],
-    role: Types.Array<string>,
-    storageUsed: number,
-    friends: Types.Array<string>
+    img: ImageInfoI[],
+    friendsCount: number,
+    createdAt: Date,
+    updatedAt: Date
 }
 
-const userSchema = new Schema<UserI>({
+export interface UserModel extends Model<UserI> {
+  findOneOrError(filter: object): Promise<HydratedDocument<UserI>>;
+}
+
+const userSchema = new Schema<UserI, UserModel>({
         username: {
             type: String,
             required: true,
@@ -47,27 +52,25 @@ const userSchema = new Schema<UserI>({
             type: [imageInfoSchema],
             default: [],
             validate: {
-                validator: arr => arr.length <= 20,
-                message: 'Cannot have more than 20 images'
+                validator: arr => arr.length <= 10,
+                message: 'Cannot have more than 10 images'
             }
         },
-        role: {
-            type: [String],
-            enum: ['user', 'moderator', 'admin'],
-            default: ['user']
-        },
-        storageUsed: {
+        friendsCount: {
             type: Number,
             default: 0
-        },
-        friends: {
-            type: [String],
-            default: [],
-            select: false
         }
     },
-    {
+    {   
+        statics: {
+            async findOneOrError(filter: object) {
+                const user = await this.findOne(filter).exec();
+                
+                if (!user) throw new ErrorWithStatus(404, 'User was not found');
+                return user;
+            }
+        },
         timestamps: true, // createdAt and updatedAt
     })
 
-export const userModel: Model<UserI> = model<UserI>('User', userSchema)
+export const userModel = model<UserI, UserModel>('User', userSchema)

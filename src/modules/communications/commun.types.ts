@@ -2,40 +2,28 @@ import { Schema } from "mongoose"
 
 export enum PayloadTypesEnum {
     TEXT = "text",
-    PHOTOS  = "photos",
-    VIDEOS  = "videos",
+    PHOTOS  = "photo",
+    VIDEOS  = "video",
 }
 
-export interface TextPayloadI {
+export interface PayloadI {
+    type: PayloadTypesEnum
+}
+
+export interface TextPayloadI extends PayloadI {
     text: string
 }
 
-export interface PhotosPayloadI {
-    paths: string[],
+export interface FilePayloadI extends PayloadI {
+    path: string,
     size: number
-}
-
-export interface VideosPayloadI {
-    paths: string[],
-    size: number
-}
-
-export interface ViewsI {
-    user_id: Schema.Types.ObjectId,
-    createdAt: Date,
-    updatedAt: Date,
 }
 
 export interface CommunicationI {
     sender_id: Schema.Types.ObjectId,
-    payload_type: PayloadTypesEnum,
-    payload: TextPayloadI | PhotosPayloadI | VideosPayloadI,
+    payloads: PayloadI[],
+    space_id: Schema.Types.ObjectId,
     createdAt: Date,
-    updatedAt: Date,
-    views: ViewsI[],
-    comments: Schema.Types.ObjectId[]
+    updatedAt: Date
 }
 
-
-
-// add reactions[]

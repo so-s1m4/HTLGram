@@ -1,16 +1,45 @@
-import { model, Schema } from "mongoose";
-import { CommunicationI, TextPayloadI, ViewsI, PayloadTypesEnum } from "./commun.types";
+import { model, Schema, Types } from "mongoose";
+import { CommunicationI, TextPayloadI, PayloadTypesEnum, PayloadI, FilePayloadI } from "./commun.types";
 
 
-const PayloadSchema = new Schema(
-    {},
+const PayloadSchema = new Schema<PayloadI>(
+    {
+        type: {
+            type: String,
+            enum: Object.values(PayloadTypesEnum),
+            required: true
+        }
+    },
     {
         _id: false,
-        discriminatorKey: "payload"
+        discriminatorKey: "schemaType"
     }
 )
 
-export const TextPayloadSchema = PayloadSchema.discriminator("TextPayload", 
+const CommunicationSchema = new Schema<CommunicationI>(
+    {   
+        sender_id: {
+            type: Types.ObjectId,
+            required: true,
+            ref: 'User'
+        },
+        space_id: {
+            type: Types.ObjectId,
+            required: true,
+            ref: 'Space',
+            index: 1
+        },
+        payloads: {
+            type: [PayloadSchema],
+            default: []
+        }
+    },
+    {
+        timestamps: true
+    }
+)
+
+CommunicationSchema.path<Schema.Types.Subdocument>('payloads').discriminator("TextPayload", 
     new Schema<TextPayloadI>({
         text: {
             type: String,
@@ -19,52 +48,25 @@ export const TextPayloadSchema = PayloadSchema.discriminator("TextPayload",
         }
     },
     {
-        _id: false,
-        discriminatorKey: "payload"
+        _id: false
     })
 )
 
-const  ViewsSchema = new Schema<ViewsI>(
-    {
-        user_id: {
-            type: Schema.Types.ObjectId,
-            required: true,
-            ref: 'User'
+CommunicationSchema.path<Schema.Types.Subdocument>('payloads').discriminator("FilePayload", 
+    new Schema<FilePayloadI>({
+        path: {
+            type: String,
+            required: true
+        },
+        size: {
+            type: Number,
+            required: true
         }
     },
     {
-        timestamps: true,
         _id: false
-    }
+    })
 )
 
-const CommunicationSchema = new Schema<CommunicationI>(
-    {   
-        sender_id: {
-            type: Schema.Types.ObjectId,
-            required: true,
-            ref: 'User'
-        },
-        payload_type: {
-            type: String,
-            enum: Object.values(PayloadTypesEnum),
-            required: true
-        },
-        payload: {
-            type: PayloadSchema
-        },
-        views: {
-            type:  [ViewsSchema],
-            default: []
-        },
-        comments: [{
-            type: Schema.Types.ObjectId,
-            ref: "Communication"
-        }]
-    },
-    {
-        timestamps: true
-    }
-)
 
 export const CommunicationModel = model<CommunicationI>('Communication', CommunicationSchema)

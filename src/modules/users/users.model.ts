@@ -6,7 +6,7 @@ export interface ImageInfoI {
   size: number;
 }
 
-const imageInfoSchema = new Schema<ImageInfoI>(
+export const imageInfoSchema = new Schema<ImageInfoI>(
   {
     path: { type: String, required: true },
     size: { type: Number, required: true }

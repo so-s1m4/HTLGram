@@ -67,8 +67,8 @@ export const friendRequestModel = model<FriendRequestI, FriendRequestModel>("Fri
 
 
 export interface FriendI {
-  user1_id: Schema.Types.ObjectId,
-  user2_id: Schema.Types.ObjectId
+  user1_id: Types.ObjectId,
+  user2_id: Types.ObjectId
 }
 
 const friendSchema = new Schema<FriendI>(

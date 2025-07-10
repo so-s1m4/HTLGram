@@ -3,9 +3,9 @@ import bcrypt from 'bcryptjs'
 import {config} from '../../config/config'
 import {ErrorWithStatus} from '../../common/middlewares/errorHandlerMiddleware'
 import jwt from 'jsonwebtoken'
-import mongoose, { Schema, Types } from "mongoose"
+import { Types } from "mongoose"
 import deleteFile from "../../common/utils/utils.deleteFile"
-import { friendModel } from "modules/friends/friends.model"
+import { friendModel } from "../friends/friends.model"
 
 export async function receiveUsersData(data:any) {
     return await userModel.find({ username: new RegExp(`^${data.startsWith}`, 'i') } )
@@ -66,9 +66,12 @@ export async function deleteMyPhotoByPath(userId: Types.ObjectId, photoPath: str
 }
 
 export async function receiveFriends(userId: Types.ObjectId) {
-    const friends = await friendModel.find({
-        $or: [{user1_id: userId}, {user2_id: userId}]
-    })
+    const pairs = await friendModel.find({ $or: [{ user1_id: userId }, { user2_id: userId }] }).lean();
+    const friendIds = pairs.map(p =>
+        p.user1_id.equals(userId) ? p.user2_id : p.user1_id
+    );
+
+    const friends = await userModel.find({ _id: { $in: friendIds } }).select("img username name _id").lean();
     return friends
 }
 

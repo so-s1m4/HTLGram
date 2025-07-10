@@ -1,7 +1,7 @@
 import { Schema, Types } from 'mongoose';
 import {friendRequestModel, FriendRequestStatus} from './friends.model'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware';
-import { userModel } from 'modules/users/users.model';
+import { userModel } from '../users/users.model';
 import { friendModel } from './friends.model';
 
 export async function createFriendRequest(user_id: Types.ObjectId, receiver_username: string, text: string) {
@@ -11,7 +11,7 @@ export async function createFriendRequest(user_id: Types.ObjectId, receiver_user
         $or: [{user1_id: sender._id, user2_id: receiver._id}, {user2_id: sender._id, user1_id: receiver._id}]
     }).exec()
     if (friend) throw new ErrorWithStatus(400, `${receiver_username} is already your friend`)
-    if (sender._id == receiver._id) throw new ErrorWithStatus(400, "You cant send request to yourself")
+    if (String(sender._id) === String(receiver._id)) throw new ErrorWithStatus(400, "You cant send request to yourself")
     const friendRequest = await friendRequestModel.findOne({$or: [{sender_id: sender._id, receiver_id: receiver._id}, {sender_id: receiver._id, receiver_id: sender._id}]})    
     if (!friendRequest) {
         return await friendRequestModel.create({sender_id: sender._id, sender_username: sender.username, receiver_id: receiver._id, receiver_username: receiver.username, text: text||""})

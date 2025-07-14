@@ -8,9 +8,9 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "docker:build": "docker build -t hltgram .",
-    "compose:up":   "docker-compose up -d",
+    "compose:up": "docker-compose up -d",
     "compose:down": "docker-compose down",
-    "logs":         "docker-compose logs -f"
+    "logs": "docker-compose logs -f"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,7 @@
     "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.27",
+    "@types/socket.io": "^3.0.1",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",

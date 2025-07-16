@@ -1,7 +1,7 @@
 import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData } from "../../server";
 import { Socket, Server } from "socket.io";
 import spacesController from './spaces.controller';
-import { socketErrorWrapper } from "../../common/utils/utils.wrappers";
+import { socketErrorWrapper, socketErrorWrapperWithData } from "../../common/utils/utils.wrappers";
 
 export const spacesHandler = (
     io: Server<
@@ -17,7 +17,8 @@ export const spacesHandler = (
         SocketData
     >
 ) => {
-    socket.on("spaces:create", socketErrorWrapper(spacesController.createSpace, socket))
+    socket.on("spaces:create", socketErrorWrapperWithData(spacesController.createSpace, socket)),
+    socket.on("spaces:getList", socketErrorWrapper(spacesController.getSpacesList, socket))
 }
 
 

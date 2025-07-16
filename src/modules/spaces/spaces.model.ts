@@ -1,13 +1,15 @@
 import { model, Schema, Types } from "mongoose";
 import { SpaceI, SpaceMemberI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types";
 import { imageInfoSchema } from "../users/users.model";
+import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware";
 
 const SpaceSchema = new Schema<SpaceI>(
     {
         type: {
             type: String,
             enum: Object.values(SpaceTypesEnum),
-            required: true
+            required: true,
+            index: 1
         },
         owner: {
             type: Types.ObjectId,
@@ -28,7 +30,7 @@ const SpaceSchema = new Schema<SpaceI>(
             }
         }
     },
-    {
+    {   
         timestamps: true
     }
 )

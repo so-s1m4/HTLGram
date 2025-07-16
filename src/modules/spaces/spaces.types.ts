@@ -4,14 +4,15 @@ import { Schema, Types } from "mongoose";
 export enum SpaceTypesEnum {
     CHAT = "chat",
     GROUP = "group",
-    POSTS = "posts"
+    POSTS = "posts",
+    CHANEL = "chanel"
 }
 
 export interface SpaceI {
     type: SpaceTypesEnum,
     owner: Schema.Types.ObjectId,
     title?: string,
-    img: ImageInfoI[],
+    img?: ImageInfoI[],
 }
 
 export enum SpaceRolesEnum {

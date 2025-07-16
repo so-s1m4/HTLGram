@@ -6,6 +6,8 @@ import jwt from 'jsonwebtoken'
 import { Types } from "mongoose"
 import deleteFile from "../../common/utils/utils.deleteFile"
 import { friendModel } from "../friends/friends.model"
+import { SpaceModel } from "../spaces/spaces.model"
+import { SpaceTypesEnum } from "../spaces/spaces.types"
 
 export async function receiveUsersData(data:any) {
     return await userModel.find({ username: new RegExp(`^${data.startsWith}`, 'i') } )
@@ -19,6 +21,10 @@ export async function createUser(data: UserI): Promise<any> {
     if (oldUser) throw new ErrorWithStatus(400, "User with such username already exist")
     data.password = await bcrypt.hash(data.password, config.PASSWORD_SALT)
     const user = await userModel.create(data)
+    await SpaceModel.create({
+        type: SpaceTypesEnum.POSTS,
+        owner: user._id
+    })
     const {password, ...userObject} = user.toObject()
     return userObject
 }

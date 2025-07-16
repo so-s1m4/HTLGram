@@ -1,5 +1,5 @@
 import { ImageInfoI } from "../users/users.model";
-import { Schema, Types } from "mongoose";
+import { HydratedDocument, Model, Schema, Types } from "mongoose";
 
 export enum SpaceTypesEnum {
     CHAT = "chat",
@@ -15,6 +15,10 @@ export interface SpaceI {
     img?: ImageInfoI[],
 }
 
+export interface SpaceModelI extends Model<SpaceI> {
+  findOneOrError(filter: object): Promise<HydratedDocument<SpaceI>>;
+}
+
 export enum SpaceRolesEnum {
     MEMBER = "member",
     ADMIN = "admin"
@@ -26,4 +30,8 @@ export interface SpaceMemberI {
     role: SpaceRolesEnum,
     isMuted: boolean,
     isBaned: boolean
+}
+
+export interface SpaceMemberModelI extends Model<SpaceMemberI> {
+  findOneOrError(filter: object): Promise<HydratedDocument<SpaceMemberI>>;
 }

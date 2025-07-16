@@ -1,9 +1,9 @@
-import { model, Schema, Types } from "mongoose";
-import { SpaceI, SpaceMemberI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types";
+import { HydratedDocument, Model, model, Schema, Types } from "mongoose";
+import { SpaceI, SpaceMemberI, SpaceMemberModelI, SpaceModelI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types";
 import { imageInfoSchema } from "../users/users.model";
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware";
 
-const SpaceSchema = new Schema<SpaceI>(
+const SpaceSchema = new Schema<SpaceI, SpaceModelI>(
     {
         type: {
             type: String,
@@ -31,13 +31,21 @@ const SpaceSchema = new Schema<SpaceI>(
         }
     },
     {   
+        statics: {
+            async findOneOrError(filter: object) {
+                const space = await this.findOne(filter).exec();
+                
+                if (!space) throw new ErrorWithStatus(404, 'Was not found');
+                return space;
+            }
+        },
         timestamps: true
     }
 )
 
-export const SpaceModel = model<SpaceI>("Space", SpaceSchema)
+export const SpaceModel = model<SpaceI, SpaceModelI>("Space", SpaceSchema)
 
-const SpaceMemberSchema = new Schema<SpaceMemberI>(
+const SpaceMemberSchema = new Schema<SpaceMemberI, SpaceMemberModelI>(
     {
         space_id: {
             type: Types.ObjectId,
@@ -64,7 +72,17 @@ const SpaceMemberSchema = new Schema<SpaceMemberI>(
             type: Boolean,
             default: false
         }
+    },
+    {
+        statics: {
+            async findOneOrError(filter: object) {
+                const spaceMember = await this.findOne(filter).exec();
+                
+                if (!spaceMember) throw new ErrorWithStatus(404, 'Was not found');
+                return spaceMember;
+            }
+        },
     }
 )
 
-export const SpaceMemberModel = model<SpaceMemberI>("SpaceMember", SpaceMemberSchema)
+export const SpaceMemberModel = model<SpaceMemberI, SpaceMemberModelI>("SpaceMember", SpaceMemberSchema)

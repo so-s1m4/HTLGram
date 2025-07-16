@@ -18,7 +18,9 @@ export const spacesHandler = (
     >
 ) => {
     socket.on("spaces:create", socketErrorWrapperWithData(spacesController.createSpace, socket)),
-    socket.on("spaces:getList", socketErrorWrapper(spacesController.getSpacesList, socket))
+    socket.on("spaces:getList", socketErrorWrapper(spacesController.getSpacesList, socket)),
+    socket.on("spaces:update", socketErrorWrapperWithData(spacesController.updateSpace, socket)),
+    socket.on("spaces:delete", socketErrorWrapperWithData(spacesController.deleteSpace, socket))
 }
 
 

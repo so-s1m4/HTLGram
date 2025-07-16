@@ -16,7 +16,9 @@ export type SocketAck = (status: boolean, error?: string, data?: any) => void;
 
 export interface ClientToServerEvents {
     "spaces:create": (data: any, callback?: SocketAck) => any,
-    "spaces:getList": (callback?: SocketAck) => any
+    "spaces:getList": (callback?: SocketAck) => any,
+    "spaces:update": (data: any, callback?: SocketAck) => any,
+    "spaces:delete": (data: any, callback?: SocketAck) => any,
 }
 
 export interface InterServerEvents {

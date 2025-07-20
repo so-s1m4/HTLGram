@@ -1,49 +1,77 @@
-import { HydratedDocument, Model, model, Schema, Types } from "mongoose";
-import { SpaceI, SpaceMemberI, SpaceMemberModelI, SpaceModelI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types";
-import { imageInfoSchema } from "../users/users.model";
+import { model, Schema, SchemaTimestampsConfig, Types } from "mongoose";
+import { BaseSpaceI, ChatI, PostsI, SpaceMemberI, SpaceMemberModelI, SpaceRolesEnum, SpaceTypesEnum} from "./spaces.types";
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware";
 
-const SpaceSchema = new Schema<SpaceI, SpaceModelI>(
+const SpaceSchema = new Schema<BaseSpaceI>(
     {
-        type: {
-            type: String,
-            enum: Object.values(SpaceTypesEnum),
-            required: true,
-            index: 1
-        },
-        owner: {
-            type: Types.ObjectId,
-            ref: "User",
-            required: true,
-            index: 1
-        },
-        title: {
-            type: String,
-            maxlength: 100
-        },
-        img: {
-            type: [imageInfoSchema],
-            default: [],
-            validate: {
-                validator: arr => arr.length <= 10,
-                message: 'Cannot have more than 10 images'
-            }
-        }
     },
     {   
-        statics: {
-            async findOneOrError(filter: object) {
-                const space = await this.findOne(filter).exec();
-                
-                if (!space) throw new ErrorWithStatus(404, 'Was not found');
-                return space;
-            }
-        },
-        timestamps: true
+        timestamps: true,
+        discriminatorKey: "type"
     }
 )
 
-export const SpaceModel = model<SpaceI, SpaceModelI>("Space", SpaceSchema)
+export const SpaceModel = model<BaseSpaceI>("Space", SpaceSchema)
+
+const ChatSchema = new Schema<ChatI>(
+    {
+        userA: { 
+            type: Types.ObjectId, 
+            ref: 'User', 
+            required: true, 
+            index: true 
+        },
+        userB: { 
+            type: Types.ObjectId, 
+            ref: 'User', 
+            required: true, 
+            index: true 
+        }
+    },
+    {
+        discriminatorKey: 'type'
+    }
+)
+
+ChatSchema.pre("validate", function (next) {
+    if (this.userA.toString() === this.userB.toString()) {
+        return next(new Error("userA and userB must be different"));
+    }
+
+    if (this.userA.toString() > this.userB.toString()) {
+        [this.userA, this.userB] = [this.userB, this.userA];
+    }
+    next();
+});
+
+ChatSchema.index({userA: 1, userB: 1}, {unique: true})
+
+export const ChatModel = SpaceModel.discriminator<ChatI>(SpaceTypesEnum.CHAT, ChatSchema)
+
+
+const PostsSchema = new Schema<PostsI>(
+    {
+        owner: {
+            type: Types.ObjectId,
+            ref: "User",
+            required: true
+        }
+    },
+    {
+        discriminatorKey: 'type'
+    }
+)
+
+PostsSchema.index(
+  { owner: 1, type: 1 },
+  { unique: true, partialFilterExpression: { type: "Posts" } }
+)
+
+
+export const PostsModel = SpaceModel.discriminator<PostsI>(SpaceTypesEnum.POSTS, PostsSchema)
+
+
+
 
 const SpaceMemberSchema = new Schema<SpaceMemberI, SpaceMemberModelI>(
     {

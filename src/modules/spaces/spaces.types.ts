@@ -1,22 +1,21 @@
-import { ImageInfoI } from "../users/users.model";
-import { HydratedDocument, Model, Schema, Types } from "mongoose";
+import { HydratedDocument, Model, Schema, SchemaTimestampsConfig, Types } from "mongoose";
 
-export enum SpaceTypesEnum {
-    CHAT = "chat",
-    GROUP = "group",
-    POSTS = "posts",
-    CHANEL = "chanel"
+export const enum SpaceTypesEnum {
+    POSTS = "Posts",
+    CHAT = "chat"
 }
 
-export interface SpaceI {
-    type: SpaceTypesEnum,
-    owner: Schema.Types.ObjectId,
-    title?: string,
-    img?: ImageInfoI[],
+export interface BaseSpaceI extends Document, SchemaTimestampsConfig {
+  type: string;
 }
 
-export interface SpaceModelI extends Model<SpaceI> {
-  findOneOrError(filter: object): Promise<HydratedDocument<SpaceI>>;
+export interface PostsI {
+    owner: Schema.Types.ObjectId
+}
+
+export interface ChatI {
+    userA: Schema.Types.ObjectId,
+    userB: Schema.Types.ObjectId
 }
 
 export enum SpaceRolesEnum {

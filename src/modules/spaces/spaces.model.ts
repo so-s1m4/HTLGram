@@ -15,13 +15,13 @@ export const SpaceModel = model<BaseSpaceI>("Space", SpaceSchema)
 
 const ChatSchema = new Schema<ChatI>(
     {
-        userA: { 
+        user1_id: { 
             type: Types.ObjectId, 
             ref: 'User', 
             required: true, 
             index: true 
         },
-        userB: { 
+        user2_id: { 
             type: Types.ObjectId, 
             ref: 'User', 
             required: true, 
@@ -34,17 +34,17 @@ const ChatSchema = new Schema<ChatI>(
 )
 
 ChatSchema.pre("validate", function (next) {
-    if (this.userA.toString() === this.userB.toString()) {
-        return next(new Error("userA and userB must be different"));
+    if (this.user1_id.toString() === this.user2_id.toString()) {
+        return next(new Error("user1_id and user2_id must be different"));
     }
 
-    if (this.userA.toString() > this.userB.toString()) {
-        [this.userA, this.userB] = [this.userB, this.userA];
+    if (this.user1_id.toString() > this.user2_id.toString()) {
+        [this.user1_id, this.user2_id] = [this.user2_id, this.user1_id];
     }
     next();
 });
 
-ChatSchema.index({userA: 1, userB: 1}, {unique: true})
+ChatSchema.index({user1_id: 1, user2_id: 1}, {unique: true})
 
 export const ChatModel = SpaceModel.discriminator<ChatI>(SpaceTypesEnum.CHAT, ChatSchema)
 

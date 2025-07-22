@@ -6,7 +6,8 @@ export const enum SpaceTypesEnum {
 }
 
 export interface BaseSpaceI extends Document, SchemaTimestampsConfig {
-  type: string;
+    _id: Schema.Types.ObjectId,
+    type: string;
 }
 
 export interface PostsI {
@@ -14,8 +15,8 @@ export interface PostsI {
 }
 
 export interface ChatI {
-    userA: Schema.Types.ObjectId,
-    userB: Schema.Types.ObjectId
+    user1_id: Schema.Types.ObjectId,
+    user2_id: Schema.Types.ObjectId
 }
 
 export enum SpaceRolesEnum {

@@ -1,11 +1,11 @@
 import { Types } from "mongoose"
 import { SpaceMemberModel, SpaceModel } from "./spaces.model"
-import { SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types"
-import { ErrorWithStatus } from "common/middlewares/errorHandlerMiddleware"
+import { BaseSpaceI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types"
+import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
 
 const spacesService = {
     async getSpacesList(userId: Types.ObjectId) {
-        const spaces = await SpaceMemberModel.find({user_id: userId}).populate("space_id").exec()
+        const spaces = await SpaceMemberModel.find({user_id: userId}).populate<{ space_id: BaseSpaceI }>("space_id").exec()
         return spaces
     },
 

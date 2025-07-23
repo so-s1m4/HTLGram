@@ -75,13 +75,13 @@ export const PostsModel = SpaceModel.discriminator<PostsI>(SpaceTypesEnum.POSTS,
 
 const SpaceMemberSchema = new Schema<SpaceMemberI, SpaceMemberModelI>(
     {
-        space_id: {
+        spaceId: {
             type: Types.ObjectId,
             ref: "Space",
             required: true,
             index: 1
         }, 
-        user_id: {
+        userId: {
             type: Types.ObjectId,
             ref: "User",
             required: true,

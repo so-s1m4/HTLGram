@@ -17,8 +17,8 @@ const chatsService = {
         if (chat) return {chat, isNew: false}
         else {
             const newchat = await ChatModel.create({user1_id, user2_id})
-            await SpaceMemberModel.create({space_id: newchat._id, user_id: user1_id, role: SpaceRolesEnum.ADMIN})
-            await SpaceMemberModel.create({space_id: newchat._id, user_id: user2_id, role: SpaceRolesEnum.ADMIN})
+            await SpaceMemberModel.create({spaceId: newchat._id, userId: user1_id, role: SpaceRolesEnum.ADMIN})
+            await SpaceMemberModel.create({spaceId: newchat._id, userId: user2_id, role: SpaceRolesEnum.ADMIN})
             return {chat:newchat, isNew: true}
         }
     }

@@ -1,4 +1,4 @@
-import { Schema } from "mongoose"
+import { HydratedDocument, Model, Schema } from "mongoose"
 
 export enum PayloadTypesEnum {
     PHOTOS  = "photo",
@@ -7,7 +7,7 @@ export enum PayloadTypesEnum {
 }
 
 export interface PayloadI extends Document {
-    communication_id: Schema.Types.ObjectId,
+    communicationId: Schema.Types.ObjectId,
     owner: Schema.Types.ObjectId,
     type: PayloadTypesEnum,
     mine: string,
@@ -17,8 +17,8 @@ export interface PayloadI extends Document {
 
 
 export interface CommunicationI extends Document {
-    sender_id: Schema.Types.ObjectId,
-    space_id: Schema.Types.ObjectId,
+    senderId: Schema.Types.ObjectId,
+    spaceId: Schema.Types.ObjectId,
     text?: string,
     isConfirmed:  boolean,
     expiresAt: Date,
@@ -27,3 +27,6 @@ export interface CommunicationI extends Document {
     updatedAt: Date
 }
 
+export interface CommunicationModelI extends Model<CommunicationI> {
+  findOneOrError(filter: object): Promise<HydratedDocument<CommunicationI>>;
+}

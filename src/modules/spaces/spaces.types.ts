@@ -25,8 +25,8 @@ export enum SpaceRolesEnum {
 }
 
 export interface SpaceMemberI {
-    space_id: Schema.Types.ObjectId,
-    user_id: Schema.Types.ObjectId,
+    spaceId: Schema.Types.ObjectId,
+    userId: Schema.Types.ObjectId,
     role: SpaceRolesEnum,
     isMuted: boolean,
     isBaned: boolean

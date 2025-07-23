@@ -1,10 +1,11 @@
 import { model, Schema, Types } from "mongoose";
-import { CommunicationI, PayloadTypesEnum, PayloadI } from "./communication.types";
+import { CommunicationI, PayloadTypesEnum, PayloadI, CommunicationModelI } from "./communication.types";
+import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware";
 
 
 const PayloadSchema = new Schema<PayloadI>(
   {
-    communication_id: {
+    communicationId: {
       type: Schema.Types.ObjectId,
       ref: 'Communication',
       required: true,
@@ -30,15 +31,15 @@ const PayloadSchema = new Schema<PayloadI>(
 );
 
 
-const CommunicationSchema = new Schema<CommunicationI>(
+const CommunicationSchema = new Schema<CommunicationI, CommunicationModelI>(
   {
-    sender_id: {
+    senderId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
       index: true,
     },
-    space_id: {
+    spaceId: {
       type: Schema.Types.ObjectId,
       ref: 'Space',
       required: true,
@@ -58,9 +59,17 @@ const CommunicationSchema = new Schema<CommunicationI>(
     editedAt:  { type: Date },
   },
   {
-    timestamps: true
+    timestamps: true,
+    statics: {
+        async findOneOrError(filter: object) {
+            const CommunicationModel = await this.findOne(filter).exec();
+            
+            if (!CommunicationModel) throw new ErrorWithStatus(404, 'Was not found');
+            return CommunicationModel;
+        }
+    },
   }
 );
 
 export const PayloadModel = model<PayloadI>('Payload', PayloadSchema);
-export const CommunicationModel = model<CommunicationI>('Communication', CommunicationSchema);
+export const CommunicationModel = model<CommunicationI, CommunicationModelI>('Communication', CommunicationSchema);

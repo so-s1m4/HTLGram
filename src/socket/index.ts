@@ -5,6 +5,7 @@ import { Server as HttpServer } from 'http';
 import JWTMiddlewareSocket from './middlewareSocket';
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './types';
 import { BaseSpaceI } from '../modules/spaces/spaces.types';
+import { communicationHandler } from '../modules/communications/communication.socket';
 
 const userSockets = new Map<string, Set<string>>();
 
@@ -34,7 +35,7 @@ async function connectToRooms(socket: Socket) {
   try {
     const spaces = await spacesService.getSpacesList(socket.data.user.userId);
     for (const space of spaces) {
-      socket.join(`${space.space_id.type}:${space.space_id._id}`);
+      socket.join(`${space.spaceId.type}:${space.spaceId._id}`);
     }
   } catch (e) {
     console.error("Failed to join rooms", e);
@@ -71,6 +72,7 @@ function initSocket(httpServer: HttpServer) {
         handleConnection(socket.data.user.userId.toString(), socket.id)
 
         spacesHandler(io, socket)
+        communicationHandler(io, socket)
         
         await connectToRooms(socket)
         socket.on("disconnect", () => {

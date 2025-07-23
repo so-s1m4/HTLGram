@@ -1,6 +1,7 @@
 import { NumberSchemaDefinition, Types } from "mongoose"
 import { CommunicationModel } from "./communication.model"
 import { SpaceMemberModel } from "../../modules/spaces/spaces.model"
+import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
 
 const communicationService = {
     async create(data: any, userId: Types.ObjectId) {
@@ -27,6 +28,15 @@ const communicationService = {
         communication.isConfirmed = true
         await communication.save()
         return {communication, isNew: true}
+    },
+
+    async update(data: {communicationId: string, text: string}, userId: Types.ObjectId) {
+        const communication = await CommunicationModel.findOneOrError({_id: data.communicationId, senderId: userId})
+        if (!communication.isConfirmed) throw new ErrorWithStatus(400, "You need to close communication first")
+        communication.text = data.text
+        communication.editedAt = new Date()
+        await communication.save()
+        return communication
     }
 }
 

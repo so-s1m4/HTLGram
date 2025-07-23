@@ -19,7 +19,8 @@ export const communicationHandler = (
 ) => {
     socket.on("communication:chats:create", socketErrorWrapperWithData(communicationController.create, socket, io)),
     socket.on("communication:chats:getList", socketErrorWrapperWithData(communicationController.getList, socket, io)),
-    socket.on("communication:chats:close", socketErrorWrapperWithData(communicationController.close, socket, io))
+    socket.on("communication:chats:close", socketErrorWrapperWithData(communicationController.close, socket, io)),
+    socket.on("communication:chats:update", socketErrorWrapperWithData(communicationController.update, socket, io))
 }
 
 

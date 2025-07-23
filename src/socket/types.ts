@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 
 export interface ServerToClientEvents {
   "communication:newMessage": (data: any) => void,
+  "communication:editMessage": (data: any) => void,
   "space:addedToNew": (data: any) => void,
 }
 
@@ -15,6 +16,7 @@ export interface ClientToServerEvents {
     "communication:chats:create": (data: any, callback?: SocketAck) => any,
     "communication:chats:getList": (data: any, callback?: SocketAck) => any,
     "communication:chats:close": (data: any, callback?: SocketAck) => any,
+    "communication:chats:update": (data: any, callback?: SocketAck) => any,
 }
 
 export interface InterServerEvents {

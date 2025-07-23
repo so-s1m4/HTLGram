@@ -17,3 +17,8 @@ export const closeCommunicationSchema = Joi.object({
     communicationId: Joi.string().trim().min(3).max(64).required()
 })
 
+
+export const updateCommunicationSchema = Joi.object({
+    communicationId: Joi.string().trim().min(3).max(64).required(),
+    text: Joi.string().trim().max(10000).required()
+})

@@ -10,7 +10,7 @@ export interface PayloadI extends Document {
     communicationId: Schema.Types.ObjectId,
     owner: Schema.Types.ObjectId,
     type: PayloadTypesEnum,
-    mine: string,
+    mime: string,
     size: number,
     path: string
 }

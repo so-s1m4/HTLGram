@@ -7,7 +7,10 @@ export const enum SpaceTypesEnum {
 
 export interface BaseSpaceI extends Document, SchemaTimestampsConfig {
     _id: Schema.Types.ObjectId,
-    type: string;
+    type: string,
+    members?: any[],
+    lastMessage?: any,
+    unreadmessages?: number
 }
 
 export interface PostsI {

@@ -5,3 +5,7 @@ export const deleteSpaceSchema = Joi.object({
     spaceId: Joi.string().trim().min(3).max(64).required()
 })
 
+export const getInfoSpaceSchema = Joi.object({
+    spaceId: Joi.string().trim().min(3).max(64).required()
+})
+

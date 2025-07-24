@@ -23,7 +23,7 @@ const PayloadSchema = new Schema<PayloadI>(
       required: true,
       index: true,
     },
-    mine:   { type: String, required: true }, 
+    mime:   { type: String, required: true }, 
     size:   { type: Number, required: true },
     path:   { type: String, required: true }, 
   },

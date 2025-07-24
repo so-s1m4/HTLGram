@@ -1,9 +1,9 @@
 import { ExtendedError, Socket } from "socket.io";
-import { ErrorWithStatus } from './errorHandlerMiddleware'
 import jwt from 'jsonwebtoken'
-import { config } from '../../config/config'
-import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from 'server';
+import { config } from '../config/config'
 import { Types } from "mongoose";
+import { ErrorWithStatus } from "../common/middlewares/errorHandlerMiddleware";
+import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from "./types";
 
 const JWTMiddlewareSocket = (socket: Socket<
         ClientToServerEvents,

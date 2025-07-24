@@ -1,21 +1,22 @@
 import { validationWrapper } from "../../common/utils/utils.wrappers";
 import { Types } from "mongoose";
-import { createChatOrGroupOrChanelSchema } from "./spaces.validation";
+import { deleteSpaceSchema, getInfoSpaceSchema } from "./spaces.validation";
 import spacesService from "./spaces.service";
 
 const spacesController =  {
-    async createSpace(data: any, userId: Types.ObjectId) {
-        const validated = validationWrapper(createChatOrGroupOrChanelSchema, data|| {})
-        return await spacesService.createSpace(validated, userId)
-    }
+    async getSpacesList(userId: Types.ObjectId) {
+        return await spacesService.getSpacesList(userId)
+    },
 
-    // async updateSpace() {
-        
-    // };
+    async deleteSpace(data: any, userId: Types.ObjectId) {
+        const validated = validationWrapper(deleteSpaceSchema, data|| {})
+        return await spacesService.deleteSpace(validated.spaceId, userId)
+    },
 
-    // async deleteSpace() {
-        
-    // };
+    // async getInfo(data: any, userId: Types.ObjectId) {
+    //     const validated = validationWrapper(getInfoSpaceSchema, data || {})
+    //     return await spacesService.getInfo(validated.spaceId, userId)
+    // }
 }
 
 export default spacesController

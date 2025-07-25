@@ -22,7 +22,8 @@ const communicationService = {
     },
 
     async close(data: {communicationId: string}, userId: Types.ObjectId) {
-        const communication = await CommunicationModel.findOneOrError({_id: data.communicationId, senderId: userId})
+        const communication = await CommunicationModel.findOne({_id: data.communicationId, senderId: userId}).populate("senderId")
+        if (!communication) throw new ErrorWithStatus(404, "Communication not found")
         if (communication.isConfirmed) return {communication, isNew: false}
         communication.isConfirmed = true
         await communication.save()

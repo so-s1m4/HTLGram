@@ -1,3 +1,4 @@
+import { ImageInfoI } from "modules/users/users.model";
 import { HydratedDocument, Model, Schema, SchemaTimestampsConfig, Types } from "mongoose";
 
 export const enum SpaceTypesEnum {
@@ -11,6 +12,7 @@ export interface BaseSpaceI extends Document, SchemaTimestampsConfig {
     members?: any[],
     lastMessage?: any,
     unreadmessages?: number
+    img?: ImageInfoI[]
 }
 
 export interface PostsI {

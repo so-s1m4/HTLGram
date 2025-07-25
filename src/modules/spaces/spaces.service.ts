@@ -13,7 +13,7 @@ const spacesService = {
                 space.spaceId.members = space.spaceId.members[0]._id === userId ? space.spaceId.members : space.spaceId.members.reverse()
             }
             space.spaceId.unreadmessages = 0
-            space.spaceId.lastMessage = await CommunicationModel.find({spaceId: space.spaceId._id, isConfirmed: true}).skip(0).limit(1).lean()
+            space.spaceId.lastMessage = await CommunicationModel.findOne({spaceId: space.spaceId._id, isConfirmed: true}).sort({ createdAt: -1 }).lean()
         }
         return spaces
     },
@@ -29,14 +29,14 @@ const spacesService = {
         return { deleted: true }
     },
 
-    // async getInfo(spaceId: Types.ObjectId, userId: Types.ObjectId) {
-    //     const member = await SpaceMemberModel.findOneOrError({spaceId, userId})
-    //     const space = await SpaceModel.findById(spaceId)
-    //     if (!space) throw new ErrorWithStatus(404, "Space not found")
-    //     if (space.type === "chat") {
+    async getInfo(spaceId: Types.ObjectId, userId: Types.ObjectId) {
+        const member = await SpaceMemberModel.findOneOrError({spaceId, userId})
+        const space = await SpaceModel.findById(spaceId)
+        if (!space) throw new ErrorWithStatus(404, "Space not found")
+        if (space.type === "chat") {
 
-    //     }
-    // }
+        }
+    }
 }
 
 export default spacesService

@@ -17,7 +17,7 @@ const communicationService = {
 
     async getList(data: {spaceId: string, limit: number, skip: number}, userId: Types.ObjectId) {
         const member = await SpaceMemberModel.findOneOrError({userId, spaceId: data.spaceId})
-        const communication = await CommunicationModel.find({spaceId: data.spaceId, isConfirmed: true}).populate("senderId").skip(data.skip).limit(data.limit).lean()
+        const communication = await CommunicationModel.find({spaceId: data.spaceId, isConfirmed: true}).sort({ createdAt: -1 }).populate("senderId").skip(data.skip).limit(data.limit).lean()
         return communication
     },
 

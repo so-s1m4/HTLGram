@@ -24,7 +24,8 @@ export interface CommunicationI extends Document {
     expiresAt: Date,
     editedAt: Date, 
     createdAt: Date,
-    updatedAt: Date
+    updatedAt: Date,
+    media: any[]
 }
 
 export interface CommunicationModelI extends Model<CommunicationI> {

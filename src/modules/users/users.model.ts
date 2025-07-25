@@ -62,10 +62,10 @@ const userSchema = new Schema<UserI, UserModel>({
             default: 0
         },
         storage: {
-        type: Number,
-        default: 0, 
-        required: true,
-    },
+            type: Number,
+            default: 0, 
+            required: true,
+        },
     },
     {   
         statics: {

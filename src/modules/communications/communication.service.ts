@@ -5,7 +5,8 @@ import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware
 import { config } from "../../config/config"
 import { deleteMediaCommunicationSchemaI } from "./communication.validation"
 import { CommunicationI } from "./communication.types"
-import { userModel } from "modules/users/users.model"
+import { userModel } from "../../modules/users/users.model"
+import getServerJWT from "../../common/utils/utils.getServersJWT"
 
 const communicationService = {
     async create(data: any, userId: Types.ObjectId) {
@@ -66,6 +67,7 @@ const communicationService = {
             "method":"DELETE",
             "headers": {
                 "Content-Type": "application/json",
+                "Authorization": "Bearear "+getServerJWT()
             },
             "body": JSON.stringify({
                 mediaId: String(media._id)

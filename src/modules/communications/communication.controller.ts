@@ -27,7 +27,7 @@ const communicationController = {
     async update(data: any, userId: Types.ObjectId, io: Server, socket: Socket) {
         const validated = validationWrapper(updateCommunicationSchema, data)
         const communication = await communicationService.update(validated, userId)
-        io.to(`chat:${communication.spaceId}`).emit("communication:editMessage", communication)
+        socket.broadcast.to(`chat:${communication.spaceId}`).emit("communication:editMessage", communication)
         return communication
     },
 

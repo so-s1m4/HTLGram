@@ -3,7 +3,7 @@ import Joi from 'joi'
 
 export const createCommunicationSchema = Joi.object({
     spaceId: Joi.string().trim().min(3).max(64).required(),
-    text: Joi.string().trim().max(10000),
+    text: Joi.string().trim().max(10000).allow('').optional(),
 })
 
 export const getListCommunicationSchema = Joi.object({
@@ -21,4 +21,12 @@ export const closeCommunicationSchema = Joi.object({
 export const updateCommunicationSchema = Joi.object({
     communicationId: Joi.string().trim().min(3).max(64).required(),
     text: Joi.string().trim().max(10000).required()
+})
+
+export interface deleteMediaCommunicationSchemaI {
+    mediaId: string
+}
+
+export const deleteMediaCommunicationSchema = Joi.object<deleteMediaCommunicationSchemaI>({
+    mediaId: Joi.string().trim().min(3).max(64).required()
 })

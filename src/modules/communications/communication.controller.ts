@@ -1,7 +1,7 @@
 import { validationWrapper } from "../../common/utils/utils.wrappers";
 import { Types } from "mongoose";
 import { Server, Socket } from "socket.io";
-import { closeCommunicationSchema, createCommunicationSchema, getListCommunicationSchema, updateCommunicationSchema } from "./communication.validation";
+import { closeCommunicationSchema, createCommunicationSchema, deleteMediaCommunicationSchema, getListCommunicationSchema, updateCommunicationSchema } from "./communication.validation";
 import communicationService from "./communication.service";
 
 const communicationController = {
@@ -29,6 +29,14 @@ const communicationController = {
         const communication = await communicationService.update(validated, userId)
         io.to(`chat:${communication.spaceId}`).emit("communication:editMessage", communication)
         return communication
+    },
+
+    async deleteMedia(data: any, userId: Types.ObjectId, io: Server, socket: Socket) {
+        const validated = validationWrapper(deleteMediaCommunicationSchema, data)
+        const media = await communicationService.deleteMedia(validated, userId)
+        io.to(`chat:${media.communicationId.spaceId}`).emit("communication:deleteMedia", media)
+        return media
+        
     }
 }
 

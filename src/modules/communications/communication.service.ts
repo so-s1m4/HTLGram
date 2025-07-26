@@ -3,6 +3,9 @@ import { CommunicationModel, PayloadModel } from "./communication.model"
 import { SpaceMemberModel } from "../../modules/spaces/spaces.model"
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
 import { config } from "../../config/config"
+import { deleteMediaCommunicationSchemaI } from "./communication.validation"
+import { CommunicationI } from "./communication.types"
+import { userModel } from "modules/users/users.model"
 
 const communicationService = {
     async create(data: any, userId: Types.ObjectId) {
@@ -51,6 +54,32 @@ const communicationService = {
         communication.editedAt = new Date()
         await communication.save()
         return communication
+    },
+
+    async deleteMedia(data: deleteMediaCommunicationSchemaI, userId: Types.ObjectId) {
+        const media = await PayloadModel.findOne({_id: data.mediaId}).populate<{ communicationId: CommunicationI }>("communicationId").exec()
+        if (!media) throw new ErrorWithStatus(404, "Media don't found")
+        if (!media.communicationId) throw new ErrorWithStatus(404, "Communication not found")
+        const member = await SpaceMemberModel.findOne({spaceId: media.communicationId.spaceId, userId})
+        if (!member) throw new ErrorWithStatus(404, "You are not in this chat")
+        const res = await fetch(config.MEDIA_SERVER+"/media", {
+            "method":"DELETE",
+            "headers": {
+                "Content-Type": "application/json",
+            },
+            "body": JSON.stringify({
+                mediaId: String(media._id)
+            }),
+        })
+
+        if (!res.ok) {
+            throw new ErrorWithStatus(res.status, "Media server error");
+        }
+        const user = await userModel.findOneOrError({_id: media.owner})
+        user.storage -= media.size
+        await user.save()
+        await media.deleteOne()
+        return media
     }
 }
 

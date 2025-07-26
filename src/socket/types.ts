@@ -18,6 +18,7 @@ export interface ClientToServerEvents {
     "communication:chats:getList": (data: any, callback?: SocketAck) => any,
     "communication:chats:close": (data: any, callback?: SocketAck) => any,
     "communication:chats:update": (data: any, callback?: SocketAck) => any,
+    "communication:chat:deleteMedia": (data: any, callback?: SocketAck) => any,
 }
 
 export interface InterServerEvents {

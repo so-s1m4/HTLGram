@@ -2,6 +2,7 @@ import { NumberSchemaDefinition, Types } from "mongoose"
 import { CommunicationModel, PayloadModel } from "./communication.model"
 import { SpaceMemberModel } from "../../modules/spaces/spaces.model"
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
+import { config } from "../../config/config"
 
 const communicationService = {
     async create(data: any, userId: Types.ObjectId) {
@@ -9,7 +10,7 @@ const communicationService = {
         const communication = await CommunicationModel.create({
             ...data,
             senderId: userId,
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+            expiresAt: new Date(Date.now() + config.TIME_TO_DELETE_COMMUNICATION * 60 * 1000),
             editedAt: new Date()
         })
         return communication

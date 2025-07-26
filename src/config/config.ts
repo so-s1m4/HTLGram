@@ -5,12 +5,14 @@ interface Config {
     PORT: number,
     JWT_SECRET: string,
     MONGO_URI: string,
-    PASSWORD_SALT: number
+    PASSWORD_SALT: number,
+    TIME_TO_DELETE_COMMUNICATION: number
 }
 
 export const config: Config = {
     PORT: Number(process.env.PORT) || 3000,
     JWT_SECRET: process.env.JWT_SECRET_ADMIN || "secret",
     MONGO_URI: process.env.MONGO_URI || "mongodb://127.0.0.1:27017/htlgram",
-    PASSWORD_SALT: Number(process.env.PASSWORD_SALT) || 10
+    PASSWORD_SALT: Number(process.env.PASSWORD_SALT) || 10,
+    TIME_TO_DELETE_COMMUNICATION: Number(process.env.TIME_TO_DELETE_COMMUNICATION) || 10
 }

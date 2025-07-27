@@ -1,4 +1,4 @@
-import { NumberSchemaDefinition, Types } from "mongoose"
+import { Schema, Types } from "mongoose"
 import { CommunicationModel, PayloadModel } from "./communication.model"
 import { SpaceMemberModel } from "../../modules/spaces/spaces.model"
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
@@ -7,6 +7,8 @@ import { deleteMediaCommunicationSchemaI } from "./communication.validation"
 import { CommunicationI } from "./communication.types"
 import { userModel } from "../../modules/users/users.model"
 import getServerJWT from "../../common/utils/utils.getServersJWT"
+import { Server } from "http"
+import { SpaceMemberI, SpaceMemberModelI } from "../../modules/spaces/spaces.types"
 
 const communicationService = {
     async create(data: any, userId: Types.ObjectId) {
@@ -58,30 +60,49 @@ const communicationService = {
     },
 
     async deleteMedia(data: deleteMediaCommunicationSchemaI, userId: Types.ObjectId) {
-        const media = await PayloadModel.findOne({_id: data.mediaId}).populate<{ communicationId: CommunicationI }>("communicationId").exec()
-        if (!media) throw new ErrorWithStatus(404, "Media don't found")
-        if (!media.communicationId) throw new ErrorWithStatus(404, "Communication not found")
-        const member = await SpaceMemberModel.findOne({spaceId: media.communicationId.spaceId, userId})
-        if (!member) throw new ErrorWithStatus(404, "You are not in this chat")
+        let medias = []
+        let user_storage = new Map<string, number>()
+
+        for (let mediaId of data.media) {
+            const media = await PayloadModel.findOne({_id: mediaId}).populate<{ communicationId: CommunicationI }>("communicationId").exec()
+            if (!media) throw new ErrorWithStatus(404, "Media don't found")
+            if (!media.communicationId) throw new ErrorWithStatus(404, "Communication not found")
+            if (!media.communicationId.isConfirmed) throw new ErrorWithStatus(404, "You need to close communications first")
+            const member = await SpaceMemberModel.findOne({spaceId: media.communicationId.spaceId, userId}).exec()
+            if (!member) throw new ErrorWithStatus(403, "You are not in this chat")
+            medias.push(media)
+            const ownerId = media.owner.toString();
+            const prev = user_storage.get(ownerId) || 0;
+            user_storage.set(ownerId, prev + media.size);
+        }
+
         const res = await fetch(config.MEDIA_SERVER+"/media", {
             "method":"DELETE",
             "headers": {
                 "Content-Type": "application/json",
-                "Authorization": "Bearear "+getServerJWT()
+                "Authorization": "Bearer "+getServerJWT()
             },
             "body": JSON.stringify({
-                mediaId: String(media._id)
+                media: medias.map(i => i._id.toString())
             }),
         })
 
         if (!res.ok) {
             throw new ErrorWithStatus(res.status, "Media server error");
         }
-        const user = await userModel.findOneOrError({_id: media.owner})
-        user.storage -= media.size
-        await user.save()
-        await media.deleteOne()
-        return media
+
+        for (let key of user_storage.keys()) {
+            await userModel.updateOne(
+                {_id: key},
+                {$inc: {storage: -user_storage.get(key)!}}
+            ).exec()
+        }
+
+        await PayloadModel.deleteMany({
+            _id: { $in: medias.map(m => m._id) }
+        }).exec()
+
+        return medias
     }
 }
 

@@ -33,10 +33,15 @@ const communicationController = {
 
     async deleteMedia(data: any, userId: Types.ObjectId, io: Server, socket: Socket) {
         const validated = validationWrapper(deleteMediaCommunicationSchema, data)
-        const media = await communicationService.deleteMedia(validated, userId)
-        io.to(`chat:${media.communicationId.spaceId}`).emit("communication:deleteMedia", media)
-        return media
-        
+        const medias = await communicationService.deleteMedia(validated, userId)
+        for (let media of medias) {
+            io.to(`chat:${media.communicationId.spaceId}`).emit("communication:deleteMedia", media)
+        }
+        return medias  
+    },
+
+    async deleteMessage(data: any, userId: Types.ObjectId, io: Server, socket: Socket) {
+
     }
 }
 

@@ -24,9 +24,18 @@ export const updateCommunicationSchema = Joi.object({
 })
 
 export interface deleteMediaCommunicationSchemaI {
-    mediaId: string
+    media: [string]
 }
 
 export const deleteMediaCommunicationSchema = Joi.object<deleteMediaCommunicationSchemaI>({
-    mediaId: Joi.string().trim().min(3).max(64).required()
+    media: Joi.array()
+        .items(
+            Joi.string()
+            .length(24)
+            .hex()
+            .required()
+        )
+        .min(1)
+        .max(20)
+        .required()
 })

@@ -3,7 +3,7 @@ import { CommunicationModel, PayloadModel } from "./communication.model"
 import { SpaceMemberModel } from "../../modules/spaces/spaces.model"
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
 import { config } from "../../config/config"
-import { deleteMediaCommunicationSchemaI } from "./communication.validation"
+import { deleteMediaCommunicationSchemaI, deleteMessagesCommunicationSchemaI } from "./communication.validation"
 import { CommunicationI } from "./communication.types"
 import { userModel } from "../../modules/users/users.model"
 import getServerJWT from "../../common/utils/utils.getServersJWT"
@@ -59,7 +59,7 @@ const communicationService = {
         return communication
     },
 
-    async deleteMedia(data: deleteMediaCommunicationSchemaI, userId: Types.ObjectId) {
+    async deleteMedias(data: deleteMediaCommunicationSchemaI, userId: Types.ObjectId) {
         let medias = []
         let user_storage = new Map<string, number>()
 
@@ -103,6 +103,20 @@ const communicationService = {
         }).exec()
 
         return medias
+    },
+
+    async deleteMessages(data: deleteMessagesCommunicationSchemaI, userId: Types.ObjectId) {
+        let communications = []
+        for (let communicationId of data.messages) {
+            const communication = await CommunicationModel.findOneOrError({_id: communicationId})
+            communications.push(communication)
+            const user = await SpaceMemberModel.findOneOrError({spaceId: communication.spaceId, userId})
+            let payloadIds = (await PayloadModel.find({communicationId: communicationId}).select("_id").lean()).map(i => String(i._id))
+            if (payloadIds.length > 0) {
+                await this.deleteMedias({ media: payloadIds }, userId)
+            }
+        }
+        return communications
     }
 }
 

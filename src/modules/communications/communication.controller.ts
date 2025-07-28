@@ -1,7 +1,7 @@
 import { validationWrapper } from "../../common/utils/utils.wrappers";
 import { Types } from "mongoose";
 import { Server, Socket } from "socket.io";
-import { closeCommunicationSchema, createCommunicationSchema, deleteMediaCommunicationSchema, getListCommunicationSchema, updateCommunicationSchema } from "./communication.validation";
+import { closeCommunicationSchema, createCommunicationSchema, deleteMediaCommunicationSchema, deleteMessagesCommunicationSchema, getListCommunicationSchema, updateCommunicationSchema } from "./communication.validation";
 import communicationService from "./communication.service";
 
 const communicationController = {
@@ -31,17 +31,22 @@ const communicationController = {
         return communication
     },
 
-    async deleteMedia(data: any, userId: Types.ObjectId, io: Server, socket: Socket) {
+    async deleteMedias(data: any, userId: Types.ObjectId, io: Server, socket: Socket) {
         const validated = validationWrapper(deleteMediaCommunicationSchema, data)
-        const medias = await communicationService.deleteMedia(validated, userId)
+        const medias = await communicationService.deleteMedias(validated, userId)
         for (let media of medias) {
             io.to(`chat:${media.communicationId.spaceId}`).emit("communication:deleteMedia", media)
         }
         return medias  
     },
 
-    async deleteMessage(data: any, userId: Types.ObjectId, io: Server, socket: Socket) {
-
+    async deleteMessages(data: any, userId: Types.ObjectId, io: Server, socket: Socket) {
+        const validated = validationWrapper(deleteMessagesCommunicationSchema, data)
+        const messages = await communicationService.deleteMessages(validated, userId)
+        for (let message of messages) {
+            io.to(`chat:${message.spaceId}`).emit("communication:deleteMessage", message)
+        }
+        return messages  
     }
 }
 

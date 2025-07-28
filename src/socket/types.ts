@@ -4,6 +4,8 @@ export interface ServerToClientEvents {
   "communication:newMessage": (data: any) => void,
   "communication:editMessage": (data: any) => void,
   "space:addedToNew": (data: any) => void,
+  "communication:deleteMedia": (data: any) => void,
+  "communication:deleteMessage": (data: any) => void,
 }
 
 export type SocketAck = (status: boolean, error?: string, data?: any) => void;
@@ -19,7 +21,7 @@ export interface ClientToServerEvents {
     "communication:chats:close": (data: any, callback?: SocketAck) => any,
     "communication:chats:update": (data: any, callback?: SocketAck) => any,
     "communication:chat:deleteMedias": (data: any, callback?: SocketAck) => any,
-    "communication:chat:deleteMessage": (data: any, callback?: SocketAck) => any,
+    "communication:chat:deleteMessages": (data: any, callback?: SocketAck) => any,
 }
 
 export interface InterServerEvents {

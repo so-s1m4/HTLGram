@@ -20,10 +20,11 @@ if (!fs.existsSync(publicDir)) {
   console.log(`Created missing directory: ${publicDir}`);
 }
 
+app.use('/public', express.static(publicDir))
 app.use(limiter)
 app.use(cors())
 app.use(express.json())
-app.use('/public', express.static(publicDir))
+
 
 
 // ROUTES

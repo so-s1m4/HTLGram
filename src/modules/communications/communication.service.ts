@@ -115,6 +115,7 @@ const communicationService = {
             if (payloadIds.length > 0) {
                 await this.deleteMedias({ media: payloadIds }, userId)
             }
+            await communication.deleteOne()
         }
         return communications
     }

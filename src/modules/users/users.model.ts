@@ -27,11 +27,11 @@ export interface UserI {
     updatedAt: Date
 }
 
-export interface UserModel extends Model<UserI> {
+export interface UserMethods extends Model<UserI> {
   findOneOrError(filter: object): Promise<HydratedDocument<UserI>>;
 }
 
-const userSchema = new Schema<UserI, UserModel>({
+const userSchema = new Schema<UserI, UserMethods>({
         username: {
             type: String,
             required: true,
@@ -79,4 +79,4 @@ const userSchema = new Schema<UserI, UserModel>({
         timestamps: true, // createdAt and updatedAt
     })
 
-export const userModel = model<UserI, UserModel>('User', userSchema)
+export const UserModel = model<UserI, UserMethods>('User', userSchema)

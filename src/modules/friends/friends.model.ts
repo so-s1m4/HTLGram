@@ -1,7 +1,6 @@
-import { userModel } from "../users/users.model";
+import { UserModel } from "../users/users.model";
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware";
 import mongoose, { model, Model, Schema, Types, Document, HydratedDocument } from "mongoose";
-import { boolean } from "joi";
 
 export type FriendRequestStatus = "sent" | "accepted" | "canceled"
 
@@ -95,8 +94,8 @@ const friendSchema = new Schema<FriendI, FriendModelI>(
   {
     statics: {
       async areFriends(user1_id: Types.ObjectId, user2_id: Types.ObjectId): Promise<boolean> {
-        const user1 = await userModel.findOneOrError({_id: user1_id})
-        const user2 = await userModel.findOneOrError({_id: user2_id})
+        const user1 = await UserModel.findOneOrError({_id: user1_id})
+        const user2 = await UserModel.findOneOrError({_id: user2_id})
         const friendship = await friendModel.findOne({
             $or: [
                 {user1_id, user2_id},

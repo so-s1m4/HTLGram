@@ -1,12 +1,12 @@
 import { Schema, Types } from 'mongoose';
 import {friendRequestModel, FriendRequestStatus} from './friends.model'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware';
-import { userModel } from '../users/users.model';
 import { friendModel } from './friends.model';
+import { UserModel } from '../../modules/users/users.model';
 
 export async function createFriendRequest(user_id: Types.ObjectId, receiver_username: string, text: string) {
-    const sender = await userModel.findOneOrError({_id: user_id})
-    const receiver = await userModel.findOneOrError({username: receiver_username})
+    const sender = await UserModel.findOneOrError({_id: user_id})
+    const receiver = await UserModel.findOneOrError({username: receiver_username})
     const friend = await friendModel.findOne({
         $or: [{user1_id: sender._id, user2_id: receiver._id}, {user2_id: sender._id, user1_id: receiver._id}]
     }).exec()
@@ -24,13 +24,13 @@ export async function createFriendRequest(user_id: Types.ObjectId, receiver_user
 }
 
 export async function updateFriendRequest(request_id: string, user_id: Types.ObjectId, status: FriendRequestStatus) {
-    const user = await userModel.findOneOrError({_id: user_id})
+    const user = await UserModel.findOneOrError({_id: user_id})
     const friendRequest = await friendRequestModel.findOneOrError({_id:request_id, status: 'sent', receiver_id:user_id})
     friendRequest.status = status
     await friendRequest.save()
     if (status === "accepted") {
-        const user1 = await userModel.findOneOrError({ _id: friendRequest.sender_id });
-        const user2 = await userModel.findOneOrError( { _id: friendRequest.receiver_id });
+        const user1 = await UserModel.findOneOrError({ _id: friendRequest.sender_id });
+        const user2 = await UserModel.findOneOrError( { _id: friendRequest.receiver_id });
 
         await friendModel.create({user1_id: user1._id, user2_id: user2._id})
 

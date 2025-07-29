@@ -5,10 +5,8 @@ import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware
 import { config } from "../../config/config"
 import { deleteMediaCommunicationSchemaI, deleteMessagesCommunicationSchemaI } from "./communication.validation"
 import { CommunicationI } from "./communication.types"
-import { userModel } from "../../modules/users/users.model"
 import getServerJWT from "../../common/utils/utils.getServersJWT"
-import { Server } from "http"
-import { SpaceMemberI, SpaceMemberModelI } from "../../modules/spaces/spaces.types"
+import { UserModel } from "../../modules/users/users.model"
 
 const communicationService = {
     async create(data: any, userId: Types.ObjectId) {
@@ -92,7 +90,7 @@ const communicationService = {
         }
 
         for (let key of user_storage.keys()) {
-            await userModel.updateOne(
+            await UserModel.updateOne(
                 {_id: key},
                 {$inc: {storage: -user_storage.get(key)!}}
             ).exec()

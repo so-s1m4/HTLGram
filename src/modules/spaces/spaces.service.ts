@@ -3,7 +3,7 @@ import { SpaceMemberModel, SpaceModel } from "./spaces.model"
 import { BaseSpaceI, ChatI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types"
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
 import { CommunicationModel } from "../../modules/communications/communication.model"
-import { userModel } from "../../modules/users/users.model"
+import { UserModel } from "../../modules/users/users.model"
 
 const spacesService = {
     async getSpacesList(userId: Types.ObjectId) {
@@ -13,12 +13,12 @@ const spacesService = {
                 const chat = space.spaceId as unknown as HydratedDocument<ChatI>
                 // const members = await SpaceMemberModel.find({spaceId: space.spaceId._id}).select("-_id -__v").populate("userId", "-space_id").lean()
                 // console.log(members)
-                // const user = await userModel.findOne({_id: String(members[0]._id) === String(userId) ? members[1]._id : members[0]._id}).select("img username").lean()
+                // const user = await UserModel.findOne({_id: String(members[0]._id) === String(userId) ? members[1]._id : members[0]._id}).select("img username").lean()
                 // if (!user) throw new ErrorWithStatus(404, "User not found")  
                 // space.spaceId.title = user.username
                 // space.spaceId.img = user.img
 
-                const user = await userModel.findOne({_id: String(chat.user1_id) === String(userId) ? chat.user2_id : chat.user1_id}).select("img username").lean()
+                const user = await UserModel.findOne({_id: String(chat.user1_id) === String(userId) ? chat.user2_id : chat.user1_id}).select("img username").lean()
                 if (!user) throw new ErrorWithStatus(404, "User not found")
                 space.spaceId.title = user.username
                 space.spaceId.img = user.img
@@ -49,7 +49,7 @@ const spacesService = {
         if (!space) throw new ErrorWithStatus(404, "Space not found")
         if (space.type === SpaceTypesEnum.CHAT) {
             const chat = space as unknown as HydratedDocument<ChatI>
-            const user = await userModel.findOne({_id: String(chat.user1_id) === String(userId) ? chat.user2_id : chat.user1_id}).select("img username").lean()
+            const user = await UserModel.findOne({_id: String(chat.user1_id) === String(userId) ? chat.user2_id : chat.user1_id}).select("img username").lean()
             if (!user) throw new ErrorWithStatus(404, "User not found")
             space.title = user.username
             space.img = user.img

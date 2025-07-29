@@ -3,7 +3,7 @@ import {ObjectSchema} from 'joi'
 import {Request, Response, NextFunction} from 'express'
 
 
-export function validationWrapper<T>(schema: ObjectSchema, data: any): T {
+export function validationWrapper<T>(schema: ObjectSchema<T>, data: any): T {
     const { error, value } = schema.validate(data);
     if (error) {
         throw new ErrorWithStatus(400, error.message)

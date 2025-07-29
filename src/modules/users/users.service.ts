@@ -19,7 +19,7 @@ const usersService = {
             .skip(data.offSet)
     },
 
-    async register(data: RegisterUserDto): Promise<UserDoc> {
+    async register(data: RegisterUserDto): Promise<string> {
         const oldUser = await UserModel.findOne({ username: data.username }).exec();
         if (oldUser) throw new ErrorWithStatus(400, "User with such username already exist");
         data.password = await bcrypt.hash(data.password, config.PASSWORD_SALT);
@@ -27,7 +27,7 @@ const usersService = {
         await PostsModel.create({
             owner: user._id
         });
-        return user;
+        return jwt.sign({ userId: user._id }, config.JWT_SECRET, { expiresIn: '7d' });
     },
 
     async login(data: LoginUserDto): Promise<string> {

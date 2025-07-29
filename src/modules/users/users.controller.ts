@@ -14,8 +14,8 @@ const usersController = {
 
     async register(req: Request, res: Response, next: NextFunction) {
         const dto = validationWrapper<RegisterUserDto>(RegisterUserSchema, req.body || {})
-        const user = await usersService.register(dto)
-        res.status(201).json({data: toUserMe(user)})
+        const token = await usersService.register(dto)
+        res.status(201).json({data: token})
     },
 
     async login(req: Request, res: Response, next: NextFunction) {

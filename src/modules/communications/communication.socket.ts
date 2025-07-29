@@ -1,6 +1,7 @@
 import { Socket, Server } from "socket.io";
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from "../../socket/types";
-import { socketErrorWrapper, socketErrorWrapperWithData } from "../../socket/wrappers";
+import { socketErrorWrapperWithData } from "../../socket/wrappers";
+import chatController from "./chats/chats.controller";
 import communicationController from "./communication.controller";
 
 export const communicationHandler = (
@@ -17,12 +18,12 @@ export const communicationHandler = (
         SocketData
     >
 ) => {
-    socket.on("communication:chats:create", socketErrorWrapperWithData(communicationController.create, socket, io)),
-    socket.on("communication:chats:getList", socketErrorWrapperWithData(communicationController.getList, socket, io)),
-    socket.on("communication:chats:close", socketErrorWrapperWithData(communicationController.close, socket, io)),
-    socket.on("communication:chats:update", socketErrorWrapperWithData(communicationController.update, socket, io)),
-    socket.on("communication:chat:deleteMedias", socketErrorWrapperWithData(communicationController.deleteMedias, socket, io))
-    socket.on("communication:chat:deleteMessages", socketErrorWrapperWithData(communicationController.deleteMessages, socket, io))
+    socket.on("communication:getList", socketErrorWrapperWithData(communicationController.getList, socket, io)),
+    socket.on("communication:close", socketErrorWrapperWithData(communicationController.close, socket, io)),
+    socket.on("communication:chats:create", socketErrorWrapperWithData(chatController.create, socket, io)),
+    socket.on("communication:chats:update", socketErrorWrapperWithData(chatController.update, socket, io)),
+    socket.on("communication:chat:deleteMedias", socketErrorWrapperWithData(chatController.deleteMedias, socket, io))
+    socket.on("communication:chat:deleteMessages", socketErrorWrapperWithData(chatController.deleteMessages, socket, io))
 }
 
 

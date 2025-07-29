@@ -17,8 +17,8 @@ export interface ClientToServerEvents {
     "spaces:chats:create": (data: any, callback?: SocketAck) => any,
 
     "communication:chats:create": (data: any, callback?: SocketAck) => any,
-    "communication:chats:getList": (data: any, callback?: SocketAck) => any,
-    "communication:chats:close": (data: any, callback?: SocketAck) => any,
+    "communication:getList": (data: any, callback?: SocketAck) => any,
+    "communication:close": (data: any, callback?: SocketAck) => any,
     "communication:chats:update": (data: any, callback?: SocketAck) => any,
     "communication:chat:deleteMedias": (data: any, callback?: SocketAck) => any,
     "communication:chat:deleteMessages": (data: any, callback?: SocketAck) => any,

@@ -69,7 +69,7 @@ const friendsController = {
         const friendRequest = await friendsService.updateFriendRequest(userId, dto, "accepted")
         const friendRequestPublic = toFriendRequestPublic(friendRequest);
         emitToUserIfOnline(friendRequestPublic.sender_id.id, "friends:requestAccepted", friendRequestPublic, io)
-        emitToUserIfOnline(friendRequestPublic.receiver_id.id, "friends:requestCanceled", friendRequestPublic, io)
+        emitToUserIfOnline(friendRequestPublic.receiver_id.id, "friends:requestAccepted", friendRequestPublic, io)
         return friendRequestPublic;
     },
 

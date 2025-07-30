@@ -37,23 +37,28 @@ const friendsService = {
         return requests as unknown as friendDoc[];
     },
 
-    async updateFriendRequest(userId: Types.ObjectId, dto: UpdateFriendRequestDto, status: FriendRequestStatus): Promise<friendDoc> {
-        const user = await UserModel.findOneOrError({_id: userId})
-        const friendRequest = await friendRequestModel.findOneOrError({_id:dto.requestId, status: 'sent', receiver_id:userId})
-        friendRequest.status = status
-        await friendRequest.save()
+    async updateFriendRequest(userId: Types.ObjectId, dto: UpdateFriendRequestDto, status: "accepted" | "canceled"): Promise<friendDoc> {
         if (status === "accepted") {
+            const friendRequest = await friendRequestModel.findOneOrError({_id:dto.requestId, status: 'sent', receiver_id:userId})
+            friendRequest.status = status
+            await friendRequest.save()
+
             const user1 = await UserModel.findOneOrError({ _id: friendRequest.sender_id });
             const user2 = await UserModel.findOneOrError( { _id: friendRequest.receiver_id });
-
             await friendModel.create({user1_id: user1._id, user2_id: user2._id})
 
             user1.friendsCount += 1;
             await user1.save();
             user2.friendsCount += 1;
             await user2.save();
+
+            return friendRequest.populate("sender_id receiver_id") as unknown as friendDoc;
+        } else {
+            const friendRequest = await friendRequestModel.findOneOrError({_id:dto.requestId, status: 'sent', $or: [{receiver_id:userId}, {sender_id:userId}]})
+            friendRequest.status = status
+            await friendRequest.save()
+            return friendRequest.populate("sender_id receiver_id") as unknown as friendDoc;
         }
-        return friendRequest.populate("sender_id receiver_id") as unknown as friendDoc;
     },
 
     async deleteFriendRequest(user_id: Types.ObjectId, dto: DeleteFriendRequestDto) {

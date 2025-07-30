@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { Types } from "mongoose";
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketAck, SocketData } from "./types";
+import { ErrorWithStatus } from "../common/middlewares/errorHandlerMiddleware";
 
 export function socketErrorWrapperWithData (func: (data: unknown, userId: Types.ObjectId, io: Server, socket: Socket) => any,
     socket: Socket<
@@ -21,7 +22,7 @@ export function socketErrorWrapperWithData (func: (data: unknown, userId: Types.
                     callback(true, undefined, result)
                 }
             } catch (e) {
-                const err = e instanceof Error ? e.message : "Unexpected error";
+                const err = e instanceof ErrorWithStatus || e instanceof Error ? e.message : "Unexpected error";
                 if (typeof callback === "function") {
                     callback(false, err, undefined)
                 }   

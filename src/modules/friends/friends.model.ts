@@ -7,9 +7,7 @@ export type FriendRequestStatus = "sent" | "accepted" | "canceled"
 export interface FriendRequestI {
     _id: Types.ObjectId,
     sender_id: Types.ObjectId,
-    sender_username: string,
     receiver_id: Types.ObjectId,
-    receiver_username: string,
     status: FriendRequestStatus,
     text: string,
     createdAt: Date,
@@ -27,19 +25,11 @@ const friendRequestSchema = new Schema<FriendRequestI, FriendRequestModelI>({
       required: true,
       index: 1
     },
-    sender_username: {
-        type: String,
-        required: true
-    },
     receiver_id: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
       index: 1
-    },
-    receiver_username: {
-        type: String,
-        required: true
     },
     status: {
       type: String,
@@ -49,8 +39,7 @@ const friendRequestSchema = new Schema<FriendRequestI, FriendRequestModelI>({
     },
     text: {
         type: String,
-        default: "",
-        required: true
+        default: ""
     }
 }, {
     statics: {

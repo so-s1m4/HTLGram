@@ -6,6 +6,7 @@ import JWTMiddlewareSocket from './middlewareSocket';
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './types';
 import { BaseSpaceI } from '../modules/spaces/spaces.types';
 import { communicationHandler } from '../modules/communications/communication.socket';
+import { friendsHandler } from '../modules/friends/friends.socket';
 
 const userSockets = new Map<string, Set<string>>();
 
@@ -55,6 +56,16 @@ export function addSocketToNewSpaceIfOnline(space: BaseSpaceI, userId: string, i
     
 }
 
+export function emitToUserIfOnline(userId: string, event: string, data: any, io: Server) {
+    const sockets = isUserOnline(userId)
+    if (!sockets) return
+    for (const socket_id of sockets) {
+        const socket = io.sockets.sockets.get(socket_id)
+        if (!socket) continue
+        socket.emit(event, data)
+    }
+}
+
 
 function initSocket(httpServer: HttpServer) {
     const io = new Server<
@@ -73,6 +84,7 @@ function initSocket(httpServer: HttpServer) {
 
         spacesHandler(io, socket)
         communicationHandler(io, socket)
+        friendsHandler(io, socket)
         
         await connectToRooms(socket)
         socket.on("disconnect", () => {

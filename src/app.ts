@@ -29,10 +29,8 @@ app.use(express.json())
 
 // ROUTES
 import usersRouter from './modules/users/users.routes'
-import friendsRouter from './modules/friends/friends.routes'
 
 app.use('/api/users', usersRouter)
-app.use('/api/friend-requests', friendsRouter)
 
 
 // Additional handlers

@@ -6,6 +6,10 @@ export interface ServerToClientEvents {
   "space:addedToNew": (data: any) => void,
   "communication:deleteMedia": (data: any) => void,
   "communication:deleteMessage": (data: any) => void,
+  "friends:newRequest": (data: any) => void,
+  "friends:requestCanceled": (data: any) => void,
+  "friends:requestAccepted": (data: any) => void,
+  "friends:requestDeleted": (data: any) => void,
 }
 
 export type SocketAck = (status: boolean, error?: string, data?: any) => void;
@@ -22,6 +26,12 @@ export interface ClientToServerEvents {
     "communication:chats:update": (data: any, callback?: SocketAck) => any,
     "communication:chat:deleteMedias": (data: any, callback?: SocketAck) => any,
     "communication:chat:deleteMessages": (data: any, callback?: SocketAck) => any,
+
+    "friends:createRequest": (data: any, callback?: SocketAck) => any,
+    "friends:acceptRequest": (data: any, callback?: SocketAck) => any,
+    "friends:cancelRequest": (data: any, callback?: SocketAck) => any,
+    "friends:deleteRequest": (data: any, callback?: SocketAck) => any,
+    "friends:getRequestsList": (data: any, callback?: SocketAck) => any,
 }
 
 export interface InterServerEvents {

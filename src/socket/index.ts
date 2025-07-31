@@ -8,7 +8,7 @@ import { BaseSpaceI } from '../modules/spaces/spaces.types';
 import { communicationHandler } from '../modules/communications/communication.socket';
 import { friendsHandler } from '../modules/friends/friends.socket';
 
-const userSockets = new Map<string, Set<string>>();
+export const userSockets = new Map<string, Set<string>>();
 
 function handleConnection(userId: string, socketId: string) {
     if (!userSockets.has(userId)) {
@@ -28,9 +28,7 @@ function handleDisconnection(userId: string, socketId: string) {
     }
 }
 
-export function isUserOnline(userId: string): Set<string> | undefined {
-  return userSockets.get(userId);
-}
+
 
 async function connectToRooms(socket: Socket) {
   try {
@@ -41,29 +39,6 @@ async function connectToRooms(socket: Socket) {
   } catch (e) {
     console.error("Failed to join rooms", e);
   }
-}
-
-export function addSocketToNewSpaceIfOnline(space: BaseSpaceI, userId: string, io: Server) {
-    const sockets = isUserOnline(userId)
-    if (!sockets) return
-    for (const socket_id of sockets) {
-        const socket = io.sockets.sockets.get(socket_id)
-        if (!socket) continue
-        socket.join(`${space.type}:${space._id}`)
-
-        socket.emit("space:addedToNew", space)
-    }
-    
-}
-
-export function emitToUserIfOnline(userId: string, event: string, data: any, io: Server) {
-    const sockets = isUserOnline(userId)
-    if (!sockets) return
-    for (const socket_id of sockets) {
-        const socket = io.sockets.sockets.get(socket_id)
-        if (!socket) continue
-        socket.emit(event, data)
-    }
 }
 
 

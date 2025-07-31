@@ -7,8 +7,9 @@ import { mapFriendsToPublic, mapUsersToPublic, toUserMe, toUserPublic } from './
 
 const usersController = {
     async getUsersList(req: Request, res: Response, next: NextFunction) {
+        const userId = res.locals.user.userId
         const dto = validationWrapper<GetUsersListDto>(GetUsersListSchema, req.query || {})
-        const users = await usersService.getUsersList(dto)
+        const users = await usersService.getUsersList(dto, userId)
         res.status(200).json({data: mapUsersToPublic(users)})
     },
 

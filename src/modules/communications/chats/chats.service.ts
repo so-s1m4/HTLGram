@@ -11,7 +11,7 @@ import { UserModel } from "../../users/users.model"
 const chatService = {
     async create(data: any, userId: Types.ObjectId) {
         const member = await SpaceMemberModel.findOneOrError({userId, spaceId: data.spaceId})
-        const communication = await ChatModel.create({
+        const communication = await CommunicationModel.create({
             ...data,
             senderId: userId,
             expiresAt: new Date(Date.now() + config.TIME_TO_DELETE_COMMUNICATION * 60 * 1000),

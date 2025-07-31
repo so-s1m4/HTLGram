@@ -22,8 +22,8 @@ export const communicationHandler = (
     socket.on("communication:close", socketErrorWrapperWithData(communicationController.close, socket, io)),
     socket.on("communication:chats:create", socketErrorWrapperWithData(chatController.create, socket, io)),
     socket.on("communication:chats:update", socketErrorWrapperWithData(chatController.update, socket, io)),
-    socket.on("communication:chat:deleteMedias", socketErrorWrapperWithData(chatController.deleteMedias, socket, io))
-    socket.on("communication:chat:deleteMessages", socketErrorWrapperWithData(chatController.deleteMessages, socket, io))
+    socket.on("communication:chats:deleteMedias", socketErrorWrapperWithData(chatController.deleteMedias, socket, io))
+    socket.on("communication:chats:deleteMessages", socketErrorWrapperWithData(chatController.deleteMessages, socket, io))
 }
 
 

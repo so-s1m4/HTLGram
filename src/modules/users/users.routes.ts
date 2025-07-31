@@ -6,7 +6,7 @@ import { upload } from '../../common/multer/multer.photo'
 
 const router = express.Router()
 
-router.get('/', ErrorWrapper(usersController.getUsersList))
+router.get('/', JWTMiddleware, ErrorWrapper(usersController.getUsersList))
 router.post('/register', ErrorWrapper(usersController.register))
 router.post('/login', ErrorWrapper(usersController.login))
 router.get('/me', JWTMiddleware, ErrorWrapper(usersController.getMyData))

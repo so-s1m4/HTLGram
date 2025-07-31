@@ -3,7 +3,7 @@ import { Types } from "mongoose"
 import { createChatSchema } from "./chats.validation"
 import chatsService from "./chats.service"
 import { Server } from "socket.io";
-import { addSocketToNewSpaceIfOnline } from "../../../socket";
+import { addSocketToNewSpaceIfOnline } from "../../../socket/socket.utils";
 import { BaseSpaceI } from "../spaces.types";
 
 const chatsController = {

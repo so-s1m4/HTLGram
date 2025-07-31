@@ -12,9 +12,12 @@ import { DeleteFriend, GetUserDataDto, GetUsersListDto, LoginUserDto, RegisterUs
 type UserDoc = HydratedDocument<UserI>;
 
 const usersService = {
-    async getUsersList(data: GetUsersListDto): Promise<UserDoc[]> {
+    async getUsersList(data: GetUsersListDto, userId: Types.ObjectId): Promise<UserDoc[]> {
         const start = data.startsWith.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        return await UserModel.find({ username: new RegExp(`^${start}`, 'i') })
+        return await UserModel.find({ 
+                username: new RegExp(`^${start}`, 'i'),
+                _id: { $ne: userId } 
+            })
             .limit(data.limit)
             .skip(data.offSet)
     },
@@ -24,6 +27,8 @@ const usersService = {
         if (oldUser) throw new ErrorWithStatus(400, "User with such username already exist");
         data.password = await bcrypt.hash(data.password, config.PASSWORD_SALT);
         const user = await UserModel.create(data);
+        user.img.push({ path: 'image.png', size: 0 })
+        await user.save();
         await PostsModel.create({
             owner: user._id
         });
@@ -87,6 +92,7 @@ const usersService = {
         const user = await UserModel.findOneOrError({ _id: userId });
         const idx = user.img.findIndex((p) => p.path === photoPath);
         if (idx === undefined || idx < 0) throw new ErrorWithStatus(404, 'Photo not found');
+        if (user.img.length === 1) throw new ErrorWithStatus(400, "You can't delete last photo");
         user.img.splice(idx, 1);
         deleteFile(photoPath);
         await user.save();

@@ -24,8 +24,8 @@ export interface ClientToServerEvents {
     "communication:getList": (data: any, callback?: SocketAck) => any,
     "communication:close": (data: any, callback?: SocketAck) => any,
     "communication:chats:update": (data: any, callback?: SocketAck) => any,
-    "communication:chat:deleteMedias": (data: any, callback?: SocketAck) => any,
-    "communication:chat:deleteMessages": (data: any, callback?: SocketAck) => any,
+    "communication:chats:deleteMedias": (data: any, callback?: SocketAck) => any,
+    "communication:chats:deleteMessages": (data: any, callback?: SocketAck) => any,
 
     "friends:createRequest": (data: any, callback?: SocketAck) => any,
     "friends:acceptRequest": (data: any, callback?: SocketAck) => any,

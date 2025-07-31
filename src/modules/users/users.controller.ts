@@ -4,6 +4,7 @@ import { validationWrapper } from '../../common/utils/utils.wrappers'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware'
 import usersService from './users.service'
 import { mapFriendsToPublic, mapUsersToPublic, toUserMe, toUserPublic } from './users.responses'
+import { isUserOnline } from '../../socket/socket.utils'
 
 const usersController = {
     async getUsersList(req: Request, res: Response, next: NextFunction) {
@@ -40,7 +41,14 @@ const usersController = {
 
     async getFriends(req: Request, res: Response, next: NextFunction) {
         const userId = res.locals.user.userId
-        const data = await usersService.getFriends(userId)
+        const data = await usersService.getFriends(userId)     
+        for (let friend of data) {
+            if (isUserOnline(friend._id.toString())) {
+                friend.isOnline = true
+            } else {
+                friend.isOnline = false
+            }
+        }   
         res.status(200).json({data: mapFriendsToPublic(data)})
     },
 

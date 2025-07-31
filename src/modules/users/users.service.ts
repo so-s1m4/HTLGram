@@ -55,7 +55,7 @@ const usersService = {
         return user;
     },
 
-    async getFriends(userId: Types.ObjectId): Promise<Array<Pick<UserI, '_id' | 'img' | 'username' | 'name'>>> {
+    async getFriends(userId: Types.ObjectId): Promise<Array<Pick<UserI, '_id' | 'img' | 'username' | 'name'>& { isOnline?: boolean }>> {
         const pairs = await friendModel.find({ $or: [{ user1_id: userId }, { user2_id: userId }] }).lean();
         const friendIds = pairs.map(p =>
             p.user1_id.equals(userId) ? p.user2_id : p.user1_id

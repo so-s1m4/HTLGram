@@ -1,3 +1,4 @@
+import { extend } from "joi";
 import { ImageInfoI } from "modules/users/users.model";
 import { HydratedDocument, Model, Schema, SchemaTimestampsConfig, Types } from "mongoose";
 
@@ -15,11 +16,11 @@ export interface BaseSpaceI extends Document, SchemaTimestampsConfig {
     img?: ImageInfoI[]
 }
 
-export interface PostsI {
+export interface PostsI extends BaseSpaceI {
     owner: Schema.Types.ObjectId
 }
 
-export interface ChatI {
+export interface ChatI extends BaseSpaceI {
     user1_id: Schema.Types.ObjectId,
     user2_id: Schema.Types.ObjectId
 }

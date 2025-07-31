@@ -29,6 +29,7 @@ export type FriendPublicR = {
   name: string;
   img: ImageInfoR[];
   isOnline?: boolean;
+  wasOnline: Date | null;
 };
 
 type WithId = { _id: Types.ObjectId | string };
@@ -59,7 +60,7 @@ export function toUserMe(
 
 
 export function toFriendPublic(
-  u: Pick<UserI, '_id' | 'img' | 'username' | 'name'> & { isOnline?: boolean }
+  u: Pick<UserI, '_id' | 'img' | 'username' | 'name' | 'wasOnline'> & { isOnline?: boolean }
 ): FriendPublicR {
   return {
     id: String(u._id),
@@ -67,6 +68,7 @@ export function toFriendPublic(
     name: u.name,
     img: (u.img ?? []).map(i => ({ path: i.path, size: i.size })),
     isOnline: u.isOnline ?? false,
+    wasOnline: u.wasOnline,
   };
 }
 
@@ -75,5 +77,5 @@ export const mapUsersToPublic = (
 ): UserPublicR[] => users.map(toUserPublic);
 
 export const mapFriendsToPublic = (
-  friends: Array<Pick<UserI, '_id' | 'img' | 'username' | 'name' > & { isOnline?: boolean }>
+  friends: Array<Pick<UserI, '_id' | 'img' | 'username' | 'name' | 'wasOnline' > & { isOnline?: boolean }>
 ): FriendPublicR[] => friends.map(toFriendPublic);

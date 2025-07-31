@@ -7,17 +7,28 @@ import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketDa
 import { BaseSpaceI } from '../modules/spaces/spaces.types';
 import { communicationHandler } from '../modules/communications/communication.socket';
 import { friendsHandler } from '../modules/friends/friends.socket';
+import { UserModel } from '../modules/users/users.model';
+import { emitToAllFriendsIfOnline } from './socket.utils';
 
 export const userSockets = new Map<string, Set<string>>();
 
-function handleConnection(userId: string, socketId: string) {
+async function handleConnection(userId: string, socketId: string, io: Server) {
     if (!userSockets.has(userId)) {
         userSockets.set(userId, new Set<string>())
     }
     userSockets.get(userId)?.add(socketId)
+    console.log(userSockets.get(userId))
+    if (userSockets.get(userId)?.size === 1) {
+      await emitToAllFriendsIfOnline(
+        userId,
+        "friends:friendOnline",
+        { userId: userId },
+        io
+      )
+    }
 }
 
-function handleDisconnection(userId: string, socketId: string) {
+async function handleDisconnection(userId: string, socketId: string, io: Server) {
     const set = userSockets.get(userId)
     if (!set) return
 
@@ -25,6 +36,16 @@ function handleDisconnection(userId: string, socketId: string) {
 
     if (set.size === 0) {
         userSockets.delete(userId)
+        await emitToAllFriendsIfOnline(
+          userId,
+          "friends:friendOffline",
+          { userId: userId, wasOnline: new Date() },
+          io
+        )
+        await UserModel.updateOne(
+          { _id: userId },
+          { $set: { wasOnline: new Date() } }
+        );
     }
 }
 
@@ -55,15 +76,15 @@ function initSocket(httpServer: HttpServer) {
     io.use(JWTMiddlewareSocket)
     
     io.on("connection", async (socket) => {
-        handleConnection(socket.data.user.userId.toString(), socket.id)
+        await handleConnection(socket.data.user.userId.toString(), socket.id, io)
 
         spacesHandler(io, socket)
         communicationHandler(io, socket)
         friendsHandler(io, socket)
         
         await connectToRooms(socket)
-        socket.on("disconnect", () => {
-            handleDisconnection(socket.data.user.userId.toString(), socket.id)
+        socket.on("disconnect", async () => {
+            await handleDisconnection(socket.data.user.userId.toString(), socket.id, io)
         })
     })
 

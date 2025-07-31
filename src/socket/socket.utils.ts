@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io';
-import { BaseSpaceI } from "modules/spaces/spaces.types";
-import { userSockets } from "socket";
+import { BaseSpaceI } from "../modules/spaces/spaces.types";
+import { userSockets } from "../socket";
+import { friendModel } from '../modules/friends/friends.model';
 
 export function isUserOnline(userId: string): Set<string> | undefined {
   return userSockets.get(userId);
@@ -29,3 +30,20 @@ export function emitToUserIfOnline(userId: string, event: string, data: any, io:
     }
 }
 
+
+export async function emitToAllFriendsIfOnline(userId: string, event: string, data: any, io: Server) {
+    const friends = await friendModel.find({
+        $or: [
+            { user1_id: userId },
+            { user2_id: userId }
+        ]
+    }).lean();
+    console.log(userId, "emitToAllFriendsIfOnline", friends);
+    for (const friend of friends) {
+        if (friend.user1_id.toString() === userId.toString()) {
+            emitToUserIfOnline(friend.user2_id.toString(), event, data, io);
+        } else {
+            emitToUserIfOnline(friend.user1_id.toString(), event, data, io);
+        }
+    }
+}

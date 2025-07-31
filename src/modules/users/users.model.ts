@@ -23,6 +23,7 @@ export interface UserI {
     img: ImageInfoI[],
     friendsCount: number,
     storage:number,
+    wasOnline: Date | null
     createdAt: Date,
     updatedAt: Date
 }
@@ -66,6 +67,10 @@ const userSchema = new Schema<UserI, UserMethods>({
             default: 0, 
             required: true,
         },
+        wasOnline: {
+            type: Date,
+            default: null
+        }
     },
     {   
         statics: {

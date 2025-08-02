@@ -25,7 +25,8 @@ export interface CommunicationI extends Document {
     editedAt: Date, 
     createdAt: Date,
     updatedAt: Date,
-    media: any[]
+    media: any[], // This will be populated with PayloadI documents
+    repliedOn?: Schema.Types.ObjectId | null,
 }
 
 export interface CommunicationModelI extends Model<CommunicationI> {

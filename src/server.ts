@@ -3,6 +3,7 @@ import connectDB from './config/db'
 import {config} from './config/config'
 import http from 'http'
 import initSocket from './socket'
+import { seedEmojis } from './scripts/seedEmojis'
 
 
 const startServer = async () => {
@@ -12,6 +13,10 @@ const startServer = async () => {
         const httpServer = http.createServer(app);
 
         initSocket(httpServer)
+
+        if (config.SEED_EMOJIS) {
+            await seedEmojis();
+        }
 
         httpServer.listen(config.PORT, () => {
             console.log(`Server runs on http://localhost:${config.PORT}`)

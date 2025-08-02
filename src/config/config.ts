@@ -7,7 +7,8 @@ interface Config {
     MONGO_URI: string,
     PASSWORD_SALT: number,
     TIME_TO_DELETE_COMMUNICATION: number,
-    MEDIA_SERVER: string
+    MEDIA_SERVER: string,
+    SEED_EMOJIS: boolean
 }
 
 export const config: Config = {
@@ -16,5 +17,6 @@ export const config: Config = {
     MONGO_URI: process.env.MONGO_URI || "mongodb://127.0.0.1:27017/htlgram",
     PASSWORD_SALT: Number(process.env.PASSWORD_SALT) || 10,
     TIME_TO_DELETE_COMMUNICATION: Number(process.env.TIME_TO_DELETE_COMMUNICATION) || 10,
-    MEDIA_SERVER: process.env.MEDIA_SERVER || "http://localhost:8001"
+    MEDIA_SERVER: process.env.MEDIA_SERVER || "http://localhost:8001",
+    SEED_EMOJIS: process.env.SEED_EMOJIS === 'true' || false
 }

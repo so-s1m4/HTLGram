@@ -17,7 +17,6 @@ async function handleConnection(userId: string, socketId: string, io: Server) {
         userSockets.set(userId, new Set<string>())
     }
     userSockets.get(userId)?.add(socketId)
-    console.log(userSockets.get(userId))
     if (userSockets.get(userId)?.size === 1) {
       await emitToAllFriendsIfOnline(
         userId,

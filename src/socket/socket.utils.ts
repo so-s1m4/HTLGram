@@ -38,7 +38,6 @@ export async function emitToAllFriendsIfOnline(userId: string, event: string, da
             { user2_id: userId }
         ]
     }).lean();
-    console.log(userId, "emitToAllFriendsIfOnline", friends);
     for (const friend of friends) {
         if (friend.user1_id.toString() === userId.toString()) {
             emitToUserIfOnline(friend.user2_id.toString(), event, data, io);

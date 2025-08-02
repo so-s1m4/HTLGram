@@ -4,6 +4,7 @@ import Joi from 'joi'
 export const createCommunicationSchema = Joi.object({
     spaceId: Joi.string().trim().min(3).max(64).required(),
     text: Joi.string().trim().max(10000).allow('').optional(),
+    repliedOn: Joi.string().trim().length(24).hex().optional(),
 })
 
 

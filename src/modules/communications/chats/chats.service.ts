@@ -11,6 +11,10 @@ import { UserModel } from "../../users/users.model"
 const chatService = {
     async create(data: any, userId: Types.ObjectId) {
         const member = await SpaceMemberModel.findOneOrError({userId, spaceId: data.spaceId})
+        if (data.repliedOn) {
+            const repliedOn = await CommunicationModel.findOneOrError({_id: data.repliedOn, spaceId: data.spaceId})
+            if (!repliedOn.isConfirmed) throw new ErrorWithStatus(400, "You need to close communication first")
+        }
         const communication = await CommunicationModel.create({
             ...data,
             senderId: userId,
@@ -78,13 +82,14 @@ const chatService = {
     async deleteMessages(data: deleteMessagesCommunicationSchemaI, userId: Types.ObjectId) {
         let communications = []
         for (let communicationId of data.messages) {
-            const communication = await CommunicationModel.findOneOrError({_id: communicationId})
-            communications.push(communication)
+            const communication = await CommunicationModel.findOneOrError({_id: communicationId})            
             const user = await SpaceMemberModel.findOneOrError({spaceId: communication.spaceId, userId})
+            const repliedMessages = CommunicationModel.updateMany({repliedOn: communicationId, spaceId: communication.spaceId}, {repliedOn: null}).exec()
             let payloadIds = (await PayloadModel.find({communicationId: communicationId}).select("_id").lean()).map(i => String(i._id))
             if (payloadIds.length > 0) {
                 await this.deleteMedias({ media: payloadIds }, userId)
             }
+            communications.push(communication)
             await communication.deleteOne()
         }
         return communications

@@ -55,6 +55,12 @@ const CommunicationSchema = new Schema<CommunicationI, CommunicationModelI>(
       default: false,
       index: true,
     },
+    repliedOn: {
+      type: Schema.Types.ObjectId,
+      ref: 'Communication',
+      index: true,
+      default: null,
+    },
     expiresAt: { type: Date },
     editedAt:  { type: Date },
   },

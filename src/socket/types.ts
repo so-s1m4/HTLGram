@@ -32,6 +32,8 @@ export interface ClientToServerEvents {
     "friends:cancelRequest": (data: any, callback?: SocketAck) => any,
     "friends:deleteRequest": (data: any, callback?: SocketAck) => any,
     "friends:getRequestsList": (data: any, callback?: SocketAck) => any,
+
+    "emojis:getList": (data: any, callback?: SocketAck) => any,
 }
 
 export interface InterServerEvents {

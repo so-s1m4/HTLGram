@@ -34,6 +34,7 @@ export interface ClientToServerEvents {
     "friends:getRequestsList": (data: any, callback?: SocketAck) => any,
 
     "emojis:getList": (data: any, callback?: SocketAck) => any,
+    "emojis:toggle": (data: any, callback?: SocketAck) => any,
 }
 
 export interface InterServerEvents {

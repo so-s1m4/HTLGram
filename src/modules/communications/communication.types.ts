@@ -17,6 +17,7 @@ export interface PayloadI extends Document {
 
 
 export interface CommunicationI extends Document {
+    _id: Schema.Types.ObjectId,
     senderId: Schema.Types.ObjectId,
     spaceId: Schema.Types.ObjectId,
     text?: string,

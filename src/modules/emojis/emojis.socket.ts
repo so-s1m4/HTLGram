@@ -18,7 +18,8 @@ export const emojisHandler = (
         SocketData
     >
 ) => {
-    socket.on("emojis:getList", socketErrorWrapperWithData(emojisController.getList, socket, io))
+    socket.on("emojis:getList", socketErrorWrapperWithData(emojisController.getList, socket, io)),
+    socket.on("emojis:toggle", socketErrorWrapperWithData(emojisController.toggle, socket, io))
 }
 
 

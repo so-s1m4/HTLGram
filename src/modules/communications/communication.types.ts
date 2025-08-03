@@ -1,3 +1,4 @@
+import { EmojiI } from "modules/emojis/emojis.types";
 import { HydratedDocument, Model, Schema } from "mongoose"
 
 export enum PayloadTypesEnum {
@@ -17,6 +18,7 @@ export interface PayloadI extends Document {
 
 
 export interface CommunicationI extends Document {
+    _id: Schema.Types.ObjectId,
     senderId: Schema.Types.ObjectId,
     spaceId: Schema.Types.ObjectId,
     text?: string,
@@ -27,6 +29,7 @@ export interface CommunicationI extends Document {
     updatedAt: Date,
     media: any[], // This will be populated with PayloadI documents
     repliedOn?: Schema.Types.ObjectId | null,
+    emoji?: any[]
 }
 
 export interface CommunicationModelI extends Model<CommunicationI> {

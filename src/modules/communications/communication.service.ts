@@ -1,7 +1,12 @@
-import { Types } from "mongoose"
+import { HydratedDocument, Types } from "mongoose"
 import { CommunicationModel, PayloadModel } from "./communication.model"
 import { SpaceMemberModel } from "./../spaces/spaces.model"
 import { ErrorWithStatus } from "./../../common/middlewares/errorHandlerMiddleware"
+import { EmojiCommunicationModel } from "../../modules/emojis/emojis.model"
+import { toEmojiCommunicationResponse, toEmojiCommunicationResponseArray } from "../../modules/emojis/emojis.response"
+import { EmojiI } from "../../modules/emojis/emojis.types"
+import { UserI } from "../../modules/users/users.model"
+import { CommunicationI } from "./communication.types"
 
 const communicationService = {
     async getList(data: {spaceId: string, limit: number, skip: number}, userId: Types.ObjectId) {
@@ -11,6 +16,10 @@ const communicationService = {
         for (let communication of communications) {
             const media = await PayloadModel.find({communicationId: communication._id})
             communication.media = media
+            const emoji = await EmojiCommunicationModel.find({
+                communicationId: communication._id
+            }).populate<{emojiId: HydratedDocument<EmojiI>, communicationId: HydratedDocument<CommunicationI>, userId: HydratedDocument<UserI>}>("emojiId communicationId userId")
+            communication.emoji = toEmojiCommunicationResponseArray(emoji)
         }
         return communications
     },

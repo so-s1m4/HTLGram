@@ -18,14 +18,16 @@ export type UserPublicResponse = {
 }
 
 export type EmojiCommunicationResponse = {
-    emoji: {
-        emoji: EmojiResponse
-        communicationId: CommunicationResponse;
-        userId: UserPublicResponse;
-        createdAt: Date;
-        updatedAt: Date;
-    },
-    action: "removed" | "added"
+    emoji: EmojiResponse
+    communicationId: CommunicationResponse;
+    userId: UserPublicResponse;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export type EmojiCommunicationWithActionResponse = {
+    emoji: EmojiCommunicationResponse;
+    action: "added" | "removed";
 }
 
 export type CommunicationResponse = {
@@ -60,19 +62,26 @@ export function toEmojiResponseArray(emojis: HydratedDocument<EmojiI>[] | EmojiI
     return emojis.map(toEmojiResponse);
 }
 
-export function toEmojiCommunicationResponse(
-    emojiAction:{
-        emoji: MergeType<EmojiCommunicationI, {emojiId: EmojiI, communicationId: CommunicationI, userId: UserI}>;
-        action: "removed" | "added";}
-): EmojiCommunicationResponse {
+export function toEmojiCommunicationResponse(emoji: MergeType<EmojiCommunicationI, {emojiId: EmojiI, communicationId: CommunicationI, userId: UserI}>): EmojiCommunicationResponse {
     return {
-        emoji: {
-            emoji: toEmojiResponse(emojiAction.emoji.emojiId),
-            communicationId: toCommunicationResponse(emojiAction.emoji.communicationId),
-            userId: toUserPublicResponse(emojiAction.emoji.userId),
-            createdAt: emojiAction.emoji.createdAt,
-            updatedAt: emojiAction.emoji.updatedAt
-        },
-        action: emojiAction.action
+        emoji: toEmojiResponse(emoji.emojiId),
+        communicationId: toCommunicationResponse(emoji.communicationId),
+        userId: toUserPublicResponse(emoji.userId),
+        createdAt: emoji.createdAt,
+        updatedAt: emoji.updatedAt
+    };
+}
+
+export function toEmojiCommunicationResponseArray(emojis: MergeType<EmojiCommunicationI, {emojiId: EmojiI, communicationId: CommunicationI, userId: UserI}>[]): EmojiCommunicationResponse[] {
+    return emojis.map(toEmojiCommunicationResponse);
+}
+
+export function toEmojiCommunicationWithActionResponse(
+    emoji: MergeType<EmojiCommunicationI, {emojiId: EmojiI, communicationId: CommunicationI, userId: UserI}>,
+    action: "added" | "removed"
+): EmojiCommunicationWithActionResponse {
+    return {
+        emoji: toEmojiCommunicationResponse(emoji),
+        action
     };
 }

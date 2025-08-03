@@ -7,6 +7,7 @@ import { deleteMediaCommunicationSchemaI, deleteMessagesCommunicationSchemaI } f
 import { CommunicationI } from "../communication.types"
 import getServerJWT from "../../../common/utils/utils.getServersJWT"
 import { UserModel } from "../../users/users.model"
+import { EmojiCommunicationModel } from "../../../modules/emojis/emojis.model"
 
 const chatService = {
     async create(data: any, userId: Types.ObjectId) {
@@ -89,6 +90,9 @@ const chatService = {
             if (payloadIds.length > 0) {
                 await this.deleteMedias({ media: payloadIds }, userId)
             }
+            await EmojiCommunicationModel.deleteMany({
+                communicationId
+            })
             communications.push(communication)
             await communication.deleteOne()
         }

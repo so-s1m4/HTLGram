@@ -7,13 +7,15 @@ export const enum SpaceTypesEnum {
     CHAT = "chat"
 }
 
-export interface BaseSpaceI extends Document, SchemaTimestampsConfig {
+export interface BaseSpaceI {
     _id: Schema.Types.ObjectId,
     type: string,
-    members?: any[],
-    lastMessage?: any,
-    unreadmessages?: number
-    img?: ImageInfoI[]
+    createdAt: Date,
+    updatedAt: Date,
+    // members?: any[],
+    // lastMessage?: any,
+    // unreadmessages?: number
+    // img?: ImageInfoI[]
 }
 
 export interface PostsI extends BaseSpaceI {

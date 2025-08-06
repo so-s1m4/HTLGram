@@ -44,3 +44,8 @@ export interface InterServerEvents {
 export interface SocketData {
   user: {userId: Types.ObjectId}
 }
+
+export interface spaceForaddSockettoNewSpaceIfOnline {
+  type: string;
+  id: string
+}

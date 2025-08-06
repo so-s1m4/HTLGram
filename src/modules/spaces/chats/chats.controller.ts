@@ -1,22 +1,19 @@
 import { validationWrapper } from "../../../common/utils/utils.wrappers"
 import { Types } from "mongoose"
-import { createChatSchema } from "./chats.validation"
+import { createChatDto, createChatSchema } from "./chats.dto"
 import chatsService from "./chats.service"
 import { Server } from "socket.io";
 import { addSocketToNewSpaceIfOnline } from "../../../socket/socket.utils";
-import { BaseSpaceI } from "../spaces.types";
 
 const chatsController = {
     async createChat(data: any, userId: Types.ObjectId, io: Server) {
-        const validated = validationWrapper(createChatSchema, data || {})
-        const {chat, isNew} =  await chatsService.createChat(userId, validated.userId)
-        
-        if (isNew) {
-            addSocketToNewSpaceIfOnline(chat as unknown as BaseSpaceI, userId.toString(), io)
-            addSocketToNewSpaceIfOnline(chat as unknown as BaseSpaceI, validated.userId.toString(), io)
+        const dto = validationWrapper<createChatDto>(createChatSchema, data || {})
+        const chatResponse =  await chatsService.createChat(userId, dto.userId)
+        if (chatResponse.isNew) {
+            addSocketToNewSpaceIfOnline(chatResponse.chat, userId.toString(), io)
+            addSocketToNewSpaceIfOnline(chatResponse.chat, dto.userId.toString(), io)
         }
-
-        return chat
+        return chatResponse
         
     }
 }

@@ -25,7 +25,9 @@ export type SpacePublicResponse = {
 
     // later
     // membersCount?: number,
-    // chat?: {}
+    chat?: {
+        friendId: string
+    }
 }
 
 const spacesService = {
@@ -79,8 +81,10 @@ const spacesService = {
                     space: 1,
                     "user1.username": 1,
                     "user1.img": 1,
+                    "user1._id": 1,
                     "user2.username": 1,
-                    "user2.img": 1
+                    "user2.img": 1,
+                    "user2._id": 1
                 }
             },
             {
@@ -103,8 +107,10 @@ const spacesService = {
                     space: 1,
                     "user1.username": 1,
                     "user1.img": 1,
+                    "user1._id": 1,
                     "user2.username": 1,
-                    "user2.img": 1
+                    "user2.img": 1,
+                    "user2._id": 1
                 }
             },
             {
@@ -144,8 +150,10 @@ const spacesService = {
                     space: 1,
                     "user1.username": 1,
                     "user1.img": 1,
+                    "user1._id": 1,
                     "user2.username": 1,
                     "user2.img": 1,
+                    "user2._id": 1,
                     "lastMessage.text": 1,
                     "lastMessage.createdAt": 1,
                     "lastMessage.editedAt": 1
@@ -155,15 +163,31 @@ const spacesService = {
         let res: SpacePublicResponse[] = []
 
         for (let space of spaces) {
-            res.push({
-                id: space.spaceId.toString(),
-                title: space.space.title || space.space.user1_id.toString() === String(userId) ? space.user2.username : space.user1.username,
-                type: SpaceTypesEnum.CHAT,
-                img: space.space.img || space.space.user1_id.toString() === String(userId) ? space.user2.img : space.user1.img,
-                updatedAt: space.space.updatedAt,
-                createdAt: space.space.createdAt,
-                lastMessage: space.lastMessage || undefined
-            })
+            if (space.space.type === SpaceTypesEnum.CHAT) {
+                res.push({
+                    id: space.spaceId.toString(),
+                    title: space.space.user1_id.toString() === String(userId) ? space.user2.username : space.user1.username,
+                    type: SpaceTypesEnum.CHAT,
+                    img: space.space.user1_id.toString() === String(userId) ? space.user2.img : space.user1.img,
+                    updatedAt: space.space.updatedAt,
+                    createdAt: space.space.createdAt,
+                    lastMessage: space.lastMessage || undefined,
+                    chat: {
+                        friendId: space.space.user1_id.toString() === String(userId) ? space.space.user2_id.toString() : space.space.user1_id.toString()
+                    }
+                })
+            } else {
+                res.push({
+                    id: space.spaceId.toString(),
+                    title: space.space.title,
+                    type: SpaceTypesEnum.POSTS,
+                    img: space.space.img,
+                    updatedAt: space.space.updatedAt,
+                    createdAt: space.space.createdAt,
+                    lastMessage: space.lastMessage || undefined
+                })
+            }
+            
         }
 
         return res

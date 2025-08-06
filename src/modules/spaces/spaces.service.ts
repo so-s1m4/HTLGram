@@ -6,7 +6,7 @@ import { CommunicationModel, PayloadModel } from "../../modules/communications/c
 import { ImageInfoI, UserModel } from "../../modules/users/users.model"
 import getServerJWT from "../../common/utils/utils.getServersJWT"
 import { config } from "../../config/config"
-import { EmojiCommunicationModel } from "modules/emojis/emojis.model"
+import { EmojiCommunicationModel } from "../../modules/emojis/emojis.model"
 
 export type LastMessage = {
     text: string,

@@ -50,7 +50,12 @@ const usersService = {
     async updateMyData(userId: Types.ObjectId, data: UpdateMyDataDto): Promise<UserDoc> {
         const user = await UserModel.findOneOrError({ _id: userId });
         if (data.password) data.password = await bcrypt.hash(data.password, config.PASSWORD_SALT);
-        user.set(data);
+        if (data.password) user.password = data.password;
+        if (data.name) user.name = data.name;
+        if (data.description) user.description = data.description;
+        if (data.file) {
+            user.img.push({ path: data.file.filename, size: data.file.size });
+        }
         await user.save();
         return user;
     },

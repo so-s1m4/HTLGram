@@ -34,7 +34,8 @@ const usersController = {
 
     async updateMyData(req: Request, res: Response, next: NextFunction) {
         const userId = res.locals.user.userId
-        const dto = validationWrapper<UpdateMyDataDto>(UpdateMyDataSchema, req.body || {})
+        req.body = req.file ? { ...req.body, file: {filename: req.file.filename, size: req.file.size}} : req.body || {}
+        const dto = validationWrapper<UpdateMyDataDto>(UpdateMyDataSchema, req.body)
         const user = await usersService.updateMyData(userId, dto)
         res.status(200).json({data: toUserMe(user)})
     },
@@ -59,7 +60,7 @@ const usersController = {
         res.status(204).end()
     },
 
-     async uploadMyPhoto(req: Request, res: Response, next: NextFunction) {
+    async uploadMyPhoto(req: Request, res: Response, next: NextFunction) {
         const userId = res.locals.user.userId
         if (!req.file) throw new ErrorWithStatus(400, "Photo not found")
         const data = await usersService.uploadMyPhoto(userId, req.file)

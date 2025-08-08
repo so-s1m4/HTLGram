@@ -1,4 +1,5 @@
 import Joi from 'joi'
+import path from 'path';
 
 export type GetUsersListDto = {
     startsWith: string;
@@ -40,12 +41,20 @@ export type UpdateMyDataDto = {
     password?: string;
     name?: string;
     description?: string;
+    file?: {
+        filename: string;
+        size: number;
+    }
 }
 
 export const UpdateMyDataSchema = Joi.object<UpdateMyDataDto>({
-    password: Joi.string().trim().min(3).max(64),
-    name: Joi.string().trim().min(3).max(64),
-    description: Joi.string().trim().max(512)
+    password: Joi.string().trim().min(3).max(64).optional(),
+    name: Joi.string().trim().min(3).max(64).optional(),
+    description: Joi.string().trim().max(512).optional(),
+    file: Joi.object({
+        filename: Joi.string().trim().required(),
+        size: Joi.number().min(0).required()
+    }).optional()
 }).min(1)
 
 export type DeleteFriend = {

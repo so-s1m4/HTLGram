@@ -1,5 +1,26 @@
 import Joi from 'joi'
 
+
+export type getLIstCommunicationDto = {
+    spaceId: string;
+    skip: number;
+    limit: number;
+}
+
+export const getListCommunicationSchema = Joi.object({
+    spaceId: Joi.string().trim().min(3).max(64).required(),
+    skip: Joi.number().positive().default(0),
+    limit: Joi.number().positive().default(100)
+})
+
+export type closeCommunicationDto = {
+    communicationId: string;
+}
+
+export const closeCommunicationSchema = Joi.object({
+    communicationId: Joi.string().trim().min(3).max(64).required()
+})
+
 export type createCommunicationDto = {
     spaceId: string;
     text?: string;
@@ -22,7 +43,7 @@ export const updateCommunicationSchema = Joi.object({
     text: Joi.string().trim().max(10000).required()
 })
 
-export interface deleteMediaCommunicationDto {
+export type deleteMediaCommunicationDto = {
     media: string[]
 }
 
@@ -39,7 +60,7 @@ export const deleteMediaCommunicationSchema = Joi.object<deleteMediaCommunicatio
         .required()
 })
 
-export interface deleteMessagesCommunicationDto {
+export type deleteMessagesCommunicationDto = {
     messages: string[]
 }
 

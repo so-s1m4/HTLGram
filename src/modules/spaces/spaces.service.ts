@@ -1,12 +1,10 @@
 import { HydratedDocument, Types } from "mongoose"
 import { SpaceMemberModel, SpaceModel } from "./spaces.model"
-import { BaseSpaceI, ChatI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types"
+import { ChatI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types"
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
-import { CommunicationModel, PayloadModel } from "../../modules/communications/communication.model"
+import { CommunicationModel } from "../../modules/communications/communication.model"
 import { ImageInfoI, UserModel } from "../../modules/users/users.model"
-import getServerJWT from "../../common/utils/utils.getServersJWT"
-import { config } from "../../config/config"
-import { EmojiCommunicationModel } from "../../modules/emojis/emojis.model"
+import communicationService from "../../modules/communications/communication.service"
 
 export type LastMessage = {
     text: string,
@@ -199,76 +197,18 @@ const spacesService = {
         if (space.type === SpaceTypesEnum.POSTS) throw new Error("Not allowed")
         const member = await SpaceMemberModel.findOneOrError({spaceId, userId})
         if ((member).role !== SpaceRolesEnum.ADMIN) throw new Error("You are not admin")
+
+        const comms = await CommunicationModel.find({
+            spaceId: new Types.ObjectId(spaceId)
+        }).select("_id").lean().exec()
         
-        const communications = await CommunicationModel.aggregate([
-            { $match: { spaceId: new Types.ObjectId(spaceId) } },
-            {
-                $lookup: {
-                    from: "payloads",
-                    localField: "_id",
-                    foreignField: "communicationId",
-                    as: "media"
-                }
-            },
-            {
-                $unwind: {
-                    path: "$media",
-                    preserveNullAndEmptyArrays: true
-                }
-            }
-        ])
-        
-        const mediaIds: string[] = []
-        const user_storage = new Map<string, number>()
-
-        for (let communication of communications) {
-            const media = communication.media
-            if (!media) continue 
-
-            const mediaId = media._id?.toString()
-            const ownerId = media.owner?.toString()
-            const size = media.size
-
-            if (mediaId) mediaIds.push(mediaId) 
-            if (ownerId && typeof size === "number") {
-                const prev = user_storage.get(ownerId) || 0
-                user_storage.set(ownerId, prev + size) 
-            }
-        }
-
-
-        if (mediaIds.length > 0) {
-            const res = await fetch(config.MEDIA_SERVER+"/media", {
-                "method":"DELETE",
-                "headers": {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer "+getServerJWT()
-                },
-                "body": JSON.stringify({
-                    media: mediaIds
-                }),
-            })
-            
-            if (!res.ok) {
-                throw new ErrorWithStatus(res.status, "Media server error");
-            }
-
-            for (let key of user_storage.keys()) {
-                await UserModel.updateOne(
-                    {_id: key},
-                    {$inc: {storage: -user_storage.get(key)!}}
-                ).exec()
-            }
-
-            await PayloadModel.deleteMany({
-                _id: { $in: mediaIds }
-            }).exec()
+        if (comms.length > 0) {
+            await communicationService.deleteMessages(
+                { messages: comms.map(c => c._id.toString()) },
+                userId
+            )
         }
         
-        await EmojiCommunicationModel.deleteMany({
-            communicationId: { $in: communications.map(c => c._id)}
-        }).exec()
-        await CommunicationModel.deleteMany({spaceId}).exec()
         await SpaceMemberModel.deleteMany({ spaceId }).exec()
         await space.deleteOne()
         return { deleted: true }
@@ -286,7 +226,7 @@ const spacesService = {
                 spaceId: chat._id,
                 isConfirmed: true,
                 text: { $regex: /^.{2,}/ }
-            }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date}>("text createdAt editedAt").lean()
+            }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date}>("text createdAt editedAt -_id").lean()
             return {
                 id: chat._id.toString(),
                 title: user.username,

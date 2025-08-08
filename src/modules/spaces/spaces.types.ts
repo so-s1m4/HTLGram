@@ -4,7 +4,9 @@ import { HydratedDocument, Model, Schema, SchemaTimestampsConfig, Types } from "
 
 export const enum SpaceTypesEnum {
     POSTS = "Posts",
-    CHAT = "chat"
+    CHAT = "chat",
+    CHANEL = "channel",
+    GROUP = "group"
 }
 
 export interface BaseSpaceI {

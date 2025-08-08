@@ -1,7 +1,6 @@
 import { Socket, Server } from "socket.io";
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from "../../socket/types";
 import { socketErrorWrapperWithData } from "../../socket/wrappers";
-import chatController from "./chats/chats.controller";
 import communicationController from "./communication.controller";
 
 export const communicationHandler = (
@@ -20,10 +19,10 @@ export const communicationHandler = (
 ) => {
     socket.on("communication:getList", socketErrorWrapperWithData(communicationController.getList, socket, io)),
     socket.on("communication:close", socketErrorWrapperWithData(communicationController.close, socket, io)),
-    socket.on("communication:chats:create", socketErrorWrapperWithData(chatController.create, socket, io)),
-    socket.on("communication:chats:update", socketErrorWrapperWithData(chatController.update, socket, io)),
-    socket.on("communication:chats:deleteMedias", socketErrorWrapperWithData(chatController.deleteMedias, socket, io))
-    socket.on("communication:chats:deleteMessages", socketErrorWrapperWithData(chatController.deleteMessages, socket, io))
+    socket.on("communication:create", socketErrorWrapperWithData(communicationController.create, socket, io)),
+    socket.on("communication:update", socketErrorWrapperWithData(communicationController.update, socket, io)),
+    socket.on("communication:deleteMedias", socketErrorWrapperWithData(communicationController.deleteMedias, socket, io))
+    socket.on("communication:deleteMessages", socketErrorWrapperWithData(communicationController.deleteMessages, socket, io))
 }
 
 

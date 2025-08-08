@@ -5,7 +5,8 @@ import { EmojiCommunicationI, EmojiI } from "./emojis.types";
 import { CommunicationI } from "../../modules/communications/communication.types";
 import { UserI } from "../../modules/users/users.model";
 import { CommunicationModel } from "../../modules/communications/communication.model";
-import { SpaceMemberModel } from "../../modules/spaces/spaces.model";
+import { SpaceMemberModel, SpaceModel } from "../../modules/spaces/spaces.model";
+import { SpaceTypesEnum } from "modules/spaces/spaces.types";
 
 const emojisService = {
   async getList(data: emojiGetListDto) {
@@ -41,11 +42,15 @@ const emojisService = {
         throw new Error("Emoji not found");
       }
       const communicationExists = await CommunicationModel.findOneOrError({_id: data.communicationId});
-      const member = await SpaceMemberModel.findOneOrError({
+      
+      const space = await SpaceModel.findById(communicationExists.spaceId);
+      if (!space) throw new Error("Space not found");
+      const member = await SpaceMemberModel.findOne({
         spaceId: communicationExists.spaceId,
         userId,
       })
-      
+      if (space.type !== SpaceTypesEnum.POSTS && (!member || (member.isBaned || member.isMuted))) throw new Error("You are banned or muted in this space");
+
       const userEmojis = await EmojiCommunicationModel.find({
         userId,
         communicationId: data.communicationId,

@@ -1,19 +1,19 @@
 import { Server, Socket } from 'socket.io';
-import { BaseSpaceI } from "../modules/spaces/spaces.types";
 import { userSockets } from "../socket";
 import { friendModel } from '../modules/friends/friends.model';
+import { spaceForaddSockettoNewSpaceIfOnline } from './types';
 
 export function isUserOnline(userId: string): Set<string> | undefined {
   return userSockets.get(userId);
 }
 
-export function addSocketToNewSpaceIfOnline(space: BaseSpaceI, userId: string, io: Server) {
+export function addSocketToNewSpaceIfOnline(space: spaceForaddSockettoNewSpaceIfOnline, userId: string, io: Server) {
     const sockets = isUserOnline(userId)
     if (!sockets) return
     for (const socket_id of sockets) {
         const socket = io.sockets.sockets.get(socket_id)
         if (!socket) continue
-        socket.join(`${space.type}:${space._id}`)
+        socket.join(`${space.type}:${space.id}`)
 
         socket.emit("space:addedToNew", space)
     }

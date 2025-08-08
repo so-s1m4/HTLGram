@@ -20,12 +20,12 @@ export interface ClientToServerEvents {
     "spaces:getInfo": (data: any, callback?: SocketAck) => any,
     "spaces:chats:create": (data: any, callback?: SocketAck) => any,
 
-    "communication:chats:create": (data: any, callback?: SocketAck) => any,
+    "communication:create": (data: any, callback?: SocketAck) => any,
     "communication:getList": (data: any, callback?: SocketAck) => any,
     "communication:close": (data: any, callback?: SocketAck) => any,
-    "communication:chats:update": (data: any, callback?: SocketAck) => any,
-    "communication:chats:deleteMedias": (data: any, callback?: SocketAck) => any,
-    "communication:chats:deleteMessages": (data: any, callback?: SocketAck) => any,
+    "communication:update": (data: any, callback?: SocketAck) => any,
+    "communication:deleteMedias": (data: any, callback?: SocketAck) => any,
+    "communication:deleteMessages": (data: any, callback?: SocketAck) => any,
 
     "friends:createRequest": (data: any, callback?: SocketAck) => any,
     "friends:acceptRequest": (data: any, callback?: SocketAck) => any,
@@ -43,4 +43,9 @@ export interface InterServerEvents {
 
 export interface SocketData {
   user: {userId: Types.ObjectId}
+}
+
+export interface spaceForaddSockettoNewSpaceIfOnline {
+  type: string;
+  id: string
 }

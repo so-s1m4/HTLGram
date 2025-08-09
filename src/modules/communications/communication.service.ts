@@ -9,7 +9,9 @@ import { createCommunicationDto, deleteMediaCommunicationDto, deleteMessagesComm
 import { SpaceRolesEnum, SpaceTypesEnum } from "../../modules/spaces/spaces.types"
 import { config } from "../../config/config"
 import getServerJWT from "../../common/utils/utils.getServersJWT"
-import { UserPublicResponse } from "../../modules/emojis/emojis.response"
+import { UserShortPublicResponse } from "../../modules/users/users.responses"
+import { EmojiCommunicationResponse, EmojiCommunicationWithoutSpaceResponse } from "../../modules/emojis/emojis.service"
+
 
 export type MediaResponse = {
     id: string,
@@ -23,19 +25,10 @@ export type MediaResponse = {
     updatedAt: Date,
 }
 
-export type EmojiResponse = {
-    id: string,
-    communicationId: string,
-    user: UserPublicResponse,
-    name: string,
-    url: string,
-    createdAt: Date
-}
-
 
 export type CommunicationResponse = {
     id: string,
-    sender: UserPublicResponse,
+    sender: UserShortPublicResponse,
     spaceId: string,
     text: string,
     repliedOn: string | null,
@@ -43,7 +36,7 @@ export type CommunicationResponse = {
     editedAt: Date,
     createdAt: Date,
     media: MediaResponse[],
-    emojis: EmojiResponse[],
+    emojis: EmojiCommunicationWithoutSpaceResponse[],
 }
 
 export type updateCommunicationPublicResponse = {
@@ -169,7 +162,11 @@ const communicationService = {
                         },
                         {
                             $project: {
-                                id: {$toString: "$_id"},
+                                emoji: {
+                                    id: {$toString: "$emoji._id"},
+                                    name: "$emoji.name",
+                                    url: "$emoji.url"
+                                },
                                 _id: 0,
                                 communicationId: {$toString: "$communicationId"},
                                 user: {
@@ -177,8 +174,6 @@ const communicationService = {
                                     username: "$userId.username",
                                     img: "$userId.img"
                                 },
-                                name: "$emoji.name",
-                                url: "$emoji.url",
                                 createdAt: 1,
                                 updatedAt: 1
                             }

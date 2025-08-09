@@ -7,6 +7,12 @@ export type ImageInfoR = {
   size: number;
 };
 
+export type UserShortPublicResponse = {
+    id: string;
+    username: string;
+    img: ImageInfoR[];
+}
+
 export type UserPublicR = {
   id: string; 
   username: string;

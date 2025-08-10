@@ -10,7 +10,7 @@ import { SpaceRolesEnum, SpaceTypesEnum } from "../../modules/spaces/spaces.type
 import { config } from "../../config/config"
 import getServerJWT from "../../common/utils/utils.getServersJWT"
 import { UserShortPublicResponse } from "../../modules/users/users.responses"
-import { EmojiCommunicationResponse, EmojiCommunicationWithoutSpaceResponse } from "../../modules/emojis/emojis.service"
+import { EmojiCommunicationWithoutSpaceResponse } from "../../modules/emojis/emojis.service"
 
 
 export type MediaResponse = {
@@ -37,6 +37,7 @@ export type CommunicationResponse = {
     createdAt: Date,
     media: MediaResponse[],
     emojis: EmojiCommunicationWithoutSpaceResponse[],
+    seq: number
 }
 
 export type updateCommunicationPublicResponse = {
@@ -60,7 +61,7 @@ export type deleteMessagesPublicResponse = {
 }
 
 const communicationService = {
-    async getList(data: getLIstCommunicationDto, userId: Types.ObjectId): Promise<CommunicationResponse[]> {
+    async getList(data: getLIstCommunicationDto, userId: Types.ObjectId): Promise<(CommunicationResponse & {wasRead: boolean})[]> {
         const space = await SpaceModel.findById(data.spaceId);
         if (!space) throw new Error("Space not found");
         const member = await SpaceMemberModel.findOne({
@@ -68,8 +69,20 @@ const communicationService = {
           userId,
         })
         if (space.type !== SpaceTypesEnum.POSTS && (!member || member.isBaned)) throw new Error("You are banned or muted in this space");
+        
+        const top2 = await SpaceMemberModel.find({
+            spaceId: data.spaceId
+        })
+        .sort({ lastReadSeq: -1, userId: 1 })
+        .select({ userId: 1, lastReadSeq: 1 })
+        .limit(2)
+        .lean();
 
-        const communications: CommunicationResponse[] = await CommunicationModel.aggregate([
+        const top1 = top2[0] ?? null; 
+        const top2nd = top2[1] ?? null;
+
+
+        const communications = await CommunicationModel.aggregate([
             {
                 $match: {
                     spaceId: new Types.ObjectId(data.spaceId),
@@ -193,13 +206,29 @@ const communicationService = {
                     createdAt: 1,
                     media: 1,
                     emojis: 1,
+                    seq: 1,
                     _id: 0
                 }
             }
             
-        ])
+        ]).exec()
 
-        return communications
+        return communications.map(comm => {
+            const senderIdStr = comm.sender.id;
+            const top1IdStr = top1?.userId?.toString();
+            
+            let candidateMax: number;
+            if (top1 && senderIdStr === top1IdStr) {
+                candidateMax = top2nd?.lastReadSeq ?? 0;
+            } else {
+                candidateMax = top1?.lastReadSeq ?? 0;
+            }
+
+            return {
+                ...comm,
+                wasRead: comm.seq <= candidateMax
+            };
+        });
     },
 
     async close(data: {communicationId: string}, userId: Types.ObjectId): Promise<{
@@ -322,6 +351,7 @@ const communicationService = {
                     createdAt: 1,
                     media: 1,
                     emojis: 1,
+                    seq: 1,
                     _id: 0
                 }
             },
@@ -335,12 +365,25 @@ const communicationService = {
         const communication = communications[0];
 
         if (!communication.isConfirmed) {
+            const space = await SpaceModel.findById(communication.spaceId);
+            if (!space) throw new ErrorWithStatus(404, "Space not found");
+            const nextSeq = space.maxMessageSeq + 1
+
+            await SpaceModel.updateOne(
+                {_id: communication.spaceId},
+                {maxMessageSeq: nextSeq}
+            )
+
             await CommunicationModel.updateOne(
                 { _id: new Types.ObjectId(data.communicationId) },
-                { isConfirmed: true }
+                { 
+                    isConfirmed: true,
+                    seq: nextSeq
+                }
             ).exec();
 
             communication.isConfirmed = true; 
+            communication.seq = nextSeq;
             return { communication, isNew: true };
         }
 

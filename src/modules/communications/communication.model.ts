@@ -61,6 +61,12 @@ const CommunicationSchema = new Schema<CommunicationI, CommunicationModelI>(
       index: true,
       default: null,
     },
+    seq: {
+      type: Number,
+      required: true,
+      index: true,
+      default: 0
+    },
     expiresAt: { type: Date },
     editedAt:  { type: Date },
   },

@@ -5,6 +5,7 @@ import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware
 import { CommunicationModel } from "../../modules/communications/communication.model"
 import { ImageInfoI, UserModel } from "../../modules/users/users.model"
 import communicationService from "../../modules/communications/communication.service"
+import { readMessagesDto } from "./spaces.dto"
 
 export type LastMessage = {
     text: string,
@@ -26,6 +27,12 @@ export type SpacePublicResponse = {
     chat?: {
         friendId: string
     }
+}
+
+export type LastReadSeqResponse = {
+    lastReadSeq: number,
+    userId: string,
+    spaceId: string
 }
 
 const spacesService = {
@@ -191,7 +198,7 @@ const spacesService = {
         return res
     },
 
-    async deleteSpace(spaceId: string, userId: Types.ObjectId) {
+    async deleteSpace(spaceId: string, userId: Types.ObjectId): Promise<{deleted: boolean, spaceId: string}> {
         const space = await SpaceModel.findById(spaceId)
         if (!space) throw new ErrorWithStatus(404, "Space not found")
         if (space.type === SpaceTypesEnum.POSTS) throw new Error("Not allowed")
@@ -211,7 +218,7 @@ const spacesService = {
         
         await SpaceMemberModel.deleteMany({ spaceId }).exec()
         await space.deleteOne()
-        return { deleted: true }
+        return { deleted: true, spaceId}
     },
 
     async getInfo(spaceId: string, userId: Types.ObjectId): Promise<SpacePublicResponse> {
@@ -238,6 +245,26 @@ const spacesService = {
             }
         } 
         return space as unknown as SpacePublicResponse // remove if new types are added
+    },
+
+    async readMessages(data: readMessagesDto, userId: Types.ObjectId): Promise<LastReadSeqResponse> {
+        const communication = await CommunicationModel.findOneOrError({
+            seq: data.messageSeq,
+            spaceId: new Types.ObjectId(data.spaceId)
+        })
+        const member = await SpaceMemberModel.findOneOrError({
+            spaceId: new Types.ObjectId(data.spaceId),
+            userId
+        })
+        if (member.isBaned) throw new ErrorWithStatus(403, "You are banned from this space")
+        
+        member.lastReadSeq = communication.seq
+        await member.save()
+        return {
+            lastReadSeq: member.lastReadSeq,
+            userId: userId.toString(),
+            spaceId: member.spaceId.toString()
+        }
     }
 }
 

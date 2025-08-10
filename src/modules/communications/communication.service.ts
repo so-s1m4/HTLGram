@@ -69,7 +69,7 @@ const communicationService = {
         })
         if (space.type !== SpaceTypesEnum.POSTS && (!member || member.isBaned)) throw new Error("You are banned or muted in this space");
 
-        const communications = await CommunicationModel.aggregate([
+        const communications: CommunicationResponse[] = await CommunicationModel.aggregate([
             {
                 $match: {
                     spaceId: new Types.ObjectId(data.spaceId),
@@ -162,18 +162,18 @@ const communicationService = {
                         },
                         {
                             $project: {
-                                emoji: {
-                                    id: {$toString: "$emoji._id"},
-                                    name: "$emoji.name",
-                                    url: "$emoji.url"
-                                },
-                                _id: 0,
-                                communicationId: {$toString: "$communicationId"},
-                                user: {
-                                    id: {$toString: "$userId._id"},
-                                    username: "$userId.username",
-                                    img: "$userId.img"
-                                },
+                                // emoji: {
+                                //     emojiUniqueId: {$toString: "$emoji._id"},
+                                //     emojiName: "$emoji.name",
+                                //     emojiUrl: "$emoji.url"
+                                // },
+                                // _id: 0,
+                                // communicationId: {$toString: "$communicationId"},
+                                // user: {
+                                //     id: {$toString: "$userId._id"},
+                                //     username: "$userId.username",
+                                //     img: "$userId.img"
+                                // },
                                 createdAt: 1,
                                 updatedAt: 1
                             }
@@ -290,7 +290,11 @@ const communicationService = {
                         },
                         {
                             $project: {
-                                id: {$toString: "$_id"},
+                                emoji: {
+                                    emojiUniqueId: {$toString: "$emoji._id"},
+                                    emojiName: "$emoji.name",
+                                    emojiUrl: "$emoji.url"
+                                },
                                 _id: 0,
                                 communicationId: {$toString: "$communicationId"},
                                 user: {
@@ -298,8 +302,6 @@ const communicationService = {
                                     username: "$userId.username",
                                     img: "$userId.img"
                                 },
-                                name: "$emoji.name",
-                                url: "$emoji.url",
                                 createdAt: 1,
                                 updatedAt: 1
                             }

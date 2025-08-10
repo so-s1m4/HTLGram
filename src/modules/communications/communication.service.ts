@@ -162,18 +162,18 @@ const communicationService = {
                         },
                         {
                             $project: {
-                                // emoji: {
-                                //     emojiUniqueId: {$toString: "$emoji._id"},
-                                //     emojiName: "$emoji.name",
-                                //     emojiUrl: "$emoji.url"
-                                // },
-                                // _id: 0,
-                                // communicationId: {$toString: "$communicationId"},
-                                // user: {
-                                //     id: {$toString: "$userId._id"},
-                                //     username: "$userId.username",
-                                //     img: "$userId.img"
-                                // },
+                                emoji: {
+                                    emojiUniqueId: {$toString: "$emoji._id"},
+                                    emojiName: "$emoji.name",
+                                    emojiUrl: "$emoji.url"
+                                },
+                                _id: 0,
+                                communicationId: {$toString: "$communicationId"},
+                                user: {
+                                    id: {$toString: "$userId._id"},
+                                    username: "$userId.username",
+                                    img: "$userId.img"
+                                },
                                 createdAt: 1,
                                 updatedAt: 1
                             }

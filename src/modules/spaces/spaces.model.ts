@@ -4,6 +4,11 @@ import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware
 
 const SpaceSchema = new Schema<BaseSpaceI>(
     {
+        maxMessageSeq: {
+            type: Number,
+            default: 0,
+            unique: true
+        }
     },
     {   
         timestamps: true,
@@ -99,6 +104,10 @@ const SpaceMemberSchema = new Schema<SpaceMemberI, SpaceMemberModelI>(
         isBaned: {
             type: Boolean,
             default: false
+        },
+        lastReadSeq: {
+            type: Number,
+            default: 0
         }
     },
     {

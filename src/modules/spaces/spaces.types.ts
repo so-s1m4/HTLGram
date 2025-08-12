@@ -12,6 +12,7 @@ export const enum SpaceTypesEnum {
 export interface BaseSpaceI {
     _id: Schema.Types.ObjectId,
     type: string,
+    maxMessageSeq: number,
     createdAt: Date,
     updatedAt: Date,
     // members?: any[],
@@ -39,7 +40,8 @@ export interface SpaceMemberI {
     userId: Schema.Types.ObjectId,
     role: SpaceRolesEnum,
     isMuted: boolean,
-    isBaned: boolean
+    isBaned: boolean,
+    lastReadSeq: number
 }
 
 export interface SpaceMemberModelI extends Model<SpaceMemberI> {

@@ -2,8 +2,9 @@ import path from 'path'
 import fs from 'fs'
 import jwt from 'jsonwebtoken'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware';
+import { config } from '../../config/config';
 
-const PRIVATE_KEY = fs.readFileSync(path.join(__dirname, '../../../jwtRS256.key'));
+const PRIVATE_KEY = fs.readFileSync(path.join(__dirname, `../../../${config.PRIVATE_KEY_PATH}`));
 
 export default function getServerJWT() {
     try {

@@ -30,9 +30,8 @@ export interface CommunicationI extends Document {
     editedAt: Date, 
     createdAt: Date,
     updatedAt: Date,
-    media: any[], // This will be populated with PayloadI documents
     repliedOn?: Schema.Types.ObjectId | null,
-    emoji?: any[]
+    seq: number
 }
 
 export interface CommunicationModelI extends Model<CommunicationI> {

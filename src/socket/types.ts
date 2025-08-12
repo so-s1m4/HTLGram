@@ -4,6 +4,8 @@ export interface ServerToClientEvents {
   "communication:newMessage": (data: any) => void,
   "communication:editMessage": (data: any) => void,
   "space:addedToNew": (data: any) => void,
+  "space:readMessages": (data: any) => void,
+  "space:deleted": (data: any) => void,
   "communication:deleteMedia": (data: any) => void,
   "communication:deleteMessage": (data: any) => void,
   "friends:newRequest": (data: any) => void,
@@ -19,6 +21,7 @@ export interface ClientToServerEvents {
     "spaces:delete": (data: any, callback?: SocketAck) => any,
     "spaces:getInfo": (data: any, callback?: SocketAck) => any,
     "spaces:chats:create": (data: any, callback?: SocketAck) => any,
+    "spaces:readMessages": (data: any, callback?: SocketAck) => any,
 
     "communication:create": (data: any, callback?: SocketAck) => any,
     "communication:getList": (data: any, callback?: SocketAck) => any,

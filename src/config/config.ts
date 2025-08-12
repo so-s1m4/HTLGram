@@ -8,7 +8,8 @@ interface Config {
     PASSWORD_SALT: number,
     TIME_TO_DELETE_COMMUNICATION: number,
     MEDIA_SERVER: string,
-    SEED_EMOJIS: boolean
+    SEED_EMOJIS: boolean,
+    PRIVATE_KEY_PATH: string
 }
 
 export const config: Config = {
@@ -18,5 +19,6 @@ export const config: Config = {
     PASSWORD_SALT: Number(process.env.PASSWORD_SALT) || 10,
     TIME_TO_DELETE_COMMUNICATION: Number(process.env.TIME_TO_DELETE_COMMUNICATION) || 10,
     MEDIA_SERVER: process.env.MEDIA_SERVER || "http://localhost:8001",
-    SEED_EMOJIS: process.env.SEED_EMOJIS === 'true' || false
+    SEED_EMOJIS: process.env.SEED_EMOJIS === 'true' || false,
+    PRIVATE_KEY_PATH: process.env.PRIVATE_KEY_PATH || 'jwtRS256.key'
 }

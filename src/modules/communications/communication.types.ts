@@ -1,4 +1,3 @@
-import { EmojiI } from "modules/emojis/emojis.types";
 import { HydratedDocument, Model, Schema } from "mongoose"
 
 export enum PayloadTypesEnum {

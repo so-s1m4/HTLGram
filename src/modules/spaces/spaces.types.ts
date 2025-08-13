@@ -1,6 +1,4 @@
-import { extend } from "joi";
-import { ImageInfoI } from "modules/users/users.model";
-import { HydratedDocument, Model, Schema, SchemaTimestampsConfig, Types } from "mongoose";
+import { HydratedDocument, Model, Schema } from "mongoose";
 
 export const enum SpaceTypesEnum {
     POSTS = "Posts",

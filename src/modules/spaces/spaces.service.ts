@@ -1,6 +1,6 @@
 import { HydratedDocument, Types } from "mongoose"
 import { SpaceMemberModel, SpaceModel } from "./spaces.model"
-import { ChatI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types"
+import { ChatI, GroupI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types"
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
 import { CommunicationModel } from "../../modules/communications/communication.model"
 import { ImageInfoI, UserModel } from "../../modules/users/users.model"
@@ -42,14 +42,6 @@ const spacesService = {
                 $match: { userId: new Types.ObjectId(userId) }
             },
             {
-                $project: {
-                    spaceId: 1,
-                    role: 1,
-                    isMuted: 1,
-                    isBaned:1,
-                }
-            },
-            {
                 $lookup: {
                     from: "spaces",
                     localField: "spaceId",
@@ -61,12 +53,6 @@ const spacesService = {
                 $unwind: "$space"
             },
             {
-                $project: {
-                    "space.__v": 0,
-
-                }
-            },
-            {
                 $lookup: {
                     from: "users",
                     localField: "space.user1_id",
@@ -75,21 +61,9 @@ const spacesService = {
                 }
             },
             {
-                $unwind: "$user1"
-            },
-            {
-                $project: {
-                    spaceId: 1,
-                    role: 1,
-                    isMuted: 1,
-                    isBaned: 1,
-                    space: 1,
-                    "user1.username": 1,
-                    "user1.img": 1,
-                    "user1._id": 1,
-                    "user2.username": 1,
-                    "user2.img": 1,
-                    "user2._id": 1
+                $unwind: {
+                    path: "$user1",
+                    preserveNullAndEmptyArrays: true
                 }
             },
             {
@@ -101,21 +75,9 @@ const spacesService = {
                 }
             },
             {
-                $unwind: "$user2"
-            },
-            {
-                $project: {
-                    spaceId: 1,
-                    role: 1,
-                    isMuted: 1,
-                    isBaned: 1,
-                    space: 1,
-                    "user1.username": 1,
-                    "user1.img": 1,
-                    "user1._id": 1,
-                    "user2.username": 1,
-                    "user2.img": 1,
-                    "user2._id": 1
+                $unwind: {
+                    path: "$user2",
+                    preserveNullAndEmptyArrays: true
                 }
             },
             {
@@ -153,12 +115,8 @@ const spacesService = {
                     isMuted: 1,
                     isBaned: 1,
                     space: 1,
-                    "user1.username": 1,
-                    "user1.img": 1,
-                    "user1._id": 1,
-                    "user2.username": 1,
-                    "user2.img": 1,
-                    "user2._id": 1,
+                    user1: 1,
+                    user2: 1,
                     "lastMessage.text": 1,
                     "lastMessage.createdAt": 1,
                     "lastMessage.editedAt": 1
@@ -166,7 +124,6 @@ const spacesService = {
             }
         ])
         let res: SpacePublicResponse[] = []
-
         for (let space of spaces) {
             if (space.space.type === SpaceTypesEnum.CHAT) {
                 res.push({
@@ -180,6 +137,16 @@ const spacesService = {
                     chat: {
                         friendId: space.space.user1_id.toString() === String(userId) ? space.space.user2_id.toString() : space.space.user1_id.toString()
                     }
+                })
+            } else if (space.space.type === SpaceTypesEnum.GROUP) {
+                res.push({
+                    id: space.spaceId.toString(),
+                    title: space.space.title,
+                    type: SpaceTypesEnum.GROUP,
+                    img: space.space.img,
+                    updatedAt: space.space.updatedAt,
+                    createdAt: space.space.createdAt,
+                    lastMessage: space.lastMessage || undefined,
                 })
             } else {
                 res.push({
@@ -243,7 +210,23 @@ const spacesService = {
                 createdAt: chat.createdAt,
                 lastMessage: lastMessage ? lastMessage : undefined
             }
-        } 
+        } else if (space.type === SpaceTypesEnum.GROUP) {
+            const group = space as unknown as HydratedDocument<GroupI>
+            const lastMessage = await CommunicationModel.findOne({
+                spaceId: group._id,
+                isConfirmed: true,
+                text: { $regex: /^.{2,}/ }
+            }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date}>("text createdAt editedAt -_id").lean()
+            return {
+                id: group._id.toString(),
+                title: group.title,
+                type: SpaceTypesEnum.GROUP,
+                img: group.img,
+                updatedAt: group.updatedAt,
+                createdAt: group.createdAt,
+                lastMessage: lastMessage ? lastMessage : undefined
+            }
+        }
         return space as unknown as SpacePublicResponse // remove if new types are added
     },
 

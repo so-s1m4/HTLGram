@@ -3,6 +3,7 @@ import spacesController from './spaces.controller';
 import chatsController from "./chats/chats.controller";
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from "../../socket/types";
 import { socketErrorWrapper, socketErrorWrapperWithData } from "../../socket/wrappers";
+import groupController from "./groups/groups.controller";
 
 export const spacesHandler = (
     io: Server<
@@ -23,7 +24,9 @@ export const spacesHandler = (
     socket.on("spaces:getInfo", socketErrorWrapperWithData(spacesController.getInfo, socket, io)),
     socket.on("spaces:readMessages", socketErrorWrapperWithData(spacesController.readMessages, socket, io)),
 
-    socket.on("spaces:chats:create", socketErrorWrapperWithData(chatsController.createChat, socket, io))
+    socket.on("spaces:chats:create", socketErrorWrapperWithData(chatsController.createChat, socket, io)),
+
+    socket.on("spaces:group:create", socketErrorWrapperWithData(groupController.createGroup, socket, io))
 }
 
 

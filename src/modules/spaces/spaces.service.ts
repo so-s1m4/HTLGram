@@ -27,6 +27,10 @@ export type SpacePublicResponse = {
     chat?: {
         friendId: string
     }
+
+    group?: {
+        owner: string
+    }
 }
 
 export type LastReadSeqResponse = {
@@ -162,7 +166,10 @@ const spacesService = {
                     updatedAt: space.space.updatedAt,
                     createdAt: space.space.createdAt,
                     lastMessage: space.lastMessage || undefined,
-                    memberCount: space.memberCount
+                    memberCount: space.memberCount,
+                    group: {
+                        owner: space.owner
+                    }
                 })
             } else {
                 res.push({
@@ -185,9 +192,14 @@ const spacesService = {
     async deleteSpace(spaceId: string, userId: Types.ObjectId): Promise<{deleted: boolean, spaceId: string}> {
         const space = await SpaceModel.findById(spaceId)
         if (!space) throw new ErrorWithStatus(404, "Space not found")
-        if (space.type === SpaceTypesEnum.POSTS) throw new Error("Not allowed")
+        if (
+            space.type === SpaceTypesEnum.GROUP &&
+            (space as any).owner &&
+            (space as any).owner !== userId
+        ) throw new ErrorWithStatus(400, "You are not owner") 
+        if (space.type === SpaceTypesEnum.POSTS) throw new ErrorWithStatus(400, "Not allowed")
         const member = await SpaceMemberModel.findOneOrError({spaceId, userId})
-        if ((member).role !== SpaceRolesEnum.ADMIN) throw new Error("You are not admin")
+        if ((member).role !== SpaceRolesEnum.ADMIN) throw new ErrorWithStatus(400, "You are not admin")
 
         const comms = await CommunicationModel.find({
             spaceId: new Types.ObjectId(spaceId)

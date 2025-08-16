@@ -79,6 +79,11 @@ export const PostsModel = SpaceModel.discriminator<PostsI>(SpaceTypesEnum.POSTS,
 
 const GroupSchema = new Schema<GroupI>(
     {
+        owner: {
+            type: Types.ObjectId,
+            ref: "User",
+            required: true
+        },
         title: {
             type: String,
             required: true,

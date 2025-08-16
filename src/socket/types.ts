@@ -7,6 +7,8 @@ export interface ServerToClientEvents {
   "space:readMessages": (data: any) => void,
   "space:deleted": (data: any) => void,
   "space:addMembers": (data: any) => void,
+  "space:removeMembers": (data: any) => void,
+  "space:removedFromSpace": (data: any) => void,
   "communication:deleteMedia": (data: any) => void,
   "communication:deleteMessage": (data: any) => void,
   "friends:newRequest": (data: any) => void,

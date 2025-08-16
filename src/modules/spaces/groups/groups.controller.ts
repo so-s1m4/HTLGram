@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 import { createGroupDto, createGroupSchema, membersListDto, membersListSchema } from "./groups.dto";
 import groupService from "./groups.service";
 import { Server } from "socket.io";
-import { addSocketToNewSpaceIfOnline } from "../../../socket/socket.utils";
+import { addSocketToNewSpaceIfOnline, removeSocketFromSpaceIfOnline } from "../../../socket/socket.utils";
 import { SpaceTypesEnum } from "../spaces.types";
 
 const groupController = {
@@ -31,7 +31,21 @@ const groupController = {
     }
 
     return newMembers 
-  }
+  },
+
+  async removeMembers(data: any, userId: Types.ObjectId, io: Server) {
+    const dto = validationWrapper<membersListDto>(membersListSchema, data || {})
+    const deletedMembers = await groupService.removeMembers(userId, dto)
+
+    if (deletedMembers.length > 0) {
+      io.to(`space:${dto.spaceId}`).emit("space:removeMembers", deletedMembers)
+      for (let member of deletedMembers) {
+        removeSocketFromSpaceIfOnline({type: SpaceTypesEnum.GROUP, id: dto.spaceId}, member.id.toString(), io)
+      }
+    }
+
+    return deletedMembers
+  }  
 };
 
 export default groupController;

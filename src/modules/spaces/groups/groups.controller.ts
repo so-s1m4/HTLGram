@@ -23,7 +23,7 @@ const groupController = {
     const dto = validationWrapper<membersListDto>(membersListSchema, data || {})
     const newMembers = await groupService.addMembers(userId, dto)
 
-    if (newMembers.length > 1) {
+    if (newMembers.length > 0) {
       io.to(`${SpaceTypesEnum.GROUP}:${dto.spaceId}`).emit("space:addMembers", newMembers)
       for (let member of newMembers) {
         addSocketToNewSpaceIfOnline({type: SpaceTypesEnum.GROUP, id: dto.spaceId}, member.id.toString(), io)

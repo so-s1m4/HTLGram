@@ -13,7 +13,7 @@ export function addSocketToNewSpaceIfOnline(space: spaceForaddSockettoNewSpaceIf
     for (const socket_id of sockets) {
         const socket = io.sockets.sockets.get(socket_id)
         if (!socket) continue
-        socket.join(`${space.type}:${space.id}`)
+        socket.join(`space:${space.id}`)
 
         socket.emit("space:addedToNew", space)
     }

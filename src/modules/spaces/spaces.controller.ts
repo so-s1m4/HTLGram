@@ -12,7 +12,7 @@ const spacesController =  {
     async deleteSpace(data: any, userId: Types.ObjectId, io: Server) {
         const dto = validationWrapper<deleteSpaceDto>(deleteSpaceSchema, data|| {})
         const space =  await spacesService.deleteSpace(dto.spaceId, userId)
-        io.to(`chat:${space.spaceId}`).emit("space:deleted", space)
+        io.to(`space:${space.spaceId}`).emit("space:deleted", space)
         return space
     },
 
@@ -24,7 +24,7 @@ const spacesController =  {
     async readMessages(data: any, userId: Types.ObjectId, io: Server) {
         const dto = validationWrapper<readMessagesDto>(readMessagesSchema, data || {})
         const readMessages = await spacesService.readMessages(dto, userId)
-        io.to(`chat:${dto.spaceId}`).emit("space:readMessages", readMessages)
+        io.to(`space:${dto.spaceId}`).emit("space:readMessages", readMessages)
         return readMessages
     }
 }

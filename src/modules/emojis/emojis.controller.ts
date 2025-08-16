@@ -14,7 +14,7 @@ const emojisController = {
     async toggle(data: any, userId: Types.ObjectId, io: Server) {
         const dto = validationWrapper<emojiToggleDto>(emojiToggleSchema, data);
         const emojiResponse = await emojisService.toggle(dto, userId);
-        io.to(`chat:${emojiResponse.emoji.spaceId}`).emit("emojis:toggle", emojiResponse);
+        io.to(`space:${emojiResponse.emoji.spaceId}`).emit("emojis:toggle", emojiResponse);
         return emojiResponse
     }
 }

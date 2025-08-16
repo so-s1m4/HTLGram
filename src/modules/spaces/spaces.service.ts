@@ -23,7 +23,7 @@ export type SpacePublicResponse = {
     lastMessage?: LastMessage,
 
     // later
-    // membersCount?: number,
+    memberCount: number,
     chat?: {
         friendId: string
     }
@@ -109,6 +109,19 @@ const spacesService = {
                 }
             },
             {
+                $lookup: {
+                from: "spacemembers",
+                localField: "spaceId",
+                foreignField: "spaceId",
+                as: "members"
+                }
+            },
+            {
+                $addFields: {
+                memberCount: { $size: "$members" }
+                }
+            },
+            {
                 $project: {
                     spaceId: 1,
                     role: 1,
@@ -117,6 +130,7 @@ const spacesService = {
                     space: 1,
                     user1: 1,
                     user2: 1,
+                    memberCount: 1,
                     "lastMessage.text": 1,
                     "lastMessage.createdAt": 1,
                     "lastMessage.editedAt": 1
@@ -134,6 +148,7 @@ const spacesService = {
                     updatedAt: space.space.updatedAt,
                     createdAt: space.space.createdAt,
                     lastMessage: space.lastMessage || undefined,
+                    memberCount: space.memberCount,
                     chat: {
                         friendId: space.space.user1_id.toString() === String(userId) ? space.space.user2_id.toString() : space.space.user1_id.toString()
                     }
@@ -147,6 +162,7 @@ const spacesService = {
                     updatedAt: space.space.updatedAt,
                     createdAt: space.space.createdAt,
                     lastMessage: space.lastMessage || undefined,
+                    memberCount: space.memberCount
                 })
             } else {
                 res.push({
@@ -156,7 +172,8 @@ const spacesService = {
                     img: space.space.img,
                     updatedAt: space.space.updatedAt,
                     createdAt: space.space.createdAt,
-                    lastMessage: space.lastMessage || undefined
+                    lastMessage: space.lastMessage || undefined,
+                    memberCount: space.memberCount
                 })
             }
             
@@ -201,6 +218,7 @@ const spacesService = {
                 isConfirmed: true,
                 text: { $regex: /^.{2,}/ }
             }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date}>("text createdAt editedAt -_id").lean()
+            const memberCount = await SpaceMemberModel.countDocuments({spaceId: chat._id})
             return {
                 id: chat._id.toString(),
                 title: user.username,
@@ -208,7 +226,8 @@ const spacesService = {
                 img: user.img,
                 updatedAt: chat.updatedAt,
                 createdAt: chat.createdAt,
-                lastMessage: lastMessage ? lastMessage : undefined
+                lastMessage: lastMessage ? lastMessage : undefined,
+                memberCount
             }
         } else if (space.type === SpaceTypesEnum.GROUP) {
             const group = space as unknown as HydratedDocument<GroupI>
@@ -217,6 +236,7 @@ const spacesService = {
                 isConfirmed: true,
                 text: { $regex: /^.{2,}/ }
             }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date}>("text createdAt editedAt -_id").lean()
+            const memberCount = await SpaceMemberModel.countDocuments({spaceId: group._id})
             return {
                 id: group._id.toString(),
                 title: group.title,
@@ -224,7 +244,8 @@ const spacesService = {
                 img: group.img,
                 updatedAt: group.updatedAt,
                 createdAt: group.createdAt,
-                lastMessage: lastMessage ? lastMessage : undefined
+                lastMessage: lastMessage ? lastMessage : undefined,
+                memberCount
             }
         }
         return space as unknown as SpacePublicResponse // remove if new types are added

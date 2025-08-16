@@ -26,7 +26,9 @@ export const spacesHandler = (
 
     socket.on("spaces:chats:create", socketErrorWrapperWithData(chatsController.createChat, socket, io)),
 
-    socket.on("spaces:group:create", socketErrorWrapperWithData(groupController.createGroup, socket, io))
+    socket.on("spaces:group:create", socketErrorWrapperWithData(groupController.createGroup, socket, io)),
+    socket.on("spaces:group:addMembers", socketErrorWrapperWithData(groupController.addMembers, socket, io))
+    // socket.on("spaces:group:removeMembers", socketErrorWrapperWithData(groupController, socket, io))
 }
 
 

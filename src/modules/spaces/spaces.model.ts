@@ -145,4 +145,10 @@ const SpaceMemberSchema = new Schema<SpaceMemberI, SpaceMemberModelI>(
     }
 )
 
+SpaceMemberSchema.index(
+  { spaceId: 1, userId: 1 },
+  { unique: true }
+);
+
+
 export const SpaceMemberModel = model<SpaceMemberI, SpaceMemberModelI>("SpaceMember", SpaceMemberSchema)

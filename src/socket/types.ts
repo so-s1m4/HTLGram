@@ -6,6 +6,7 @@ export interface ServerToClientEvents {
   "space:addedToNew": (data: any) => void,
   "space:readMessages": (data: any) => void,
   "space:deleted": (data: any) => void,
+  "space:addMembers": (data: any) => void,
   "communication:deleteMedia": (data: any) => void,
   "communication:deleteMessage": (data: any) => void,
   "friends:newRequest": (data: any) => void,
@@ -23,6 +24,8 @@ export interface ClientToServerEvents {
     "spaces:chats:create": (data: any, callback?: SocketAck) => any,
     "spaces:readMessages": (data: any, callback?: SocketAck) => any,
     "spaces:group:create": (data: any, callback?: SocketAck) => any,
+    "spaces:group:addMembers": (data: any, callback?: SocketAck) => any,
+    "spaces:group:removeMembers": (data: any, callback?: SocketAck) => any,
 
     "communication:create": (data: any, callback?: SocketAck) => any,
     "communication:getList": (data: any, callback?: SocketAck) => any,

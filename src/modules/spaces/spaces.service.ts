@@ -3,9 +3,11 @@ import { SpaceMemberModel, SpaceModel } from "./spaces.model"
 import { ChatI, GroupI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types"
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
 import { CommunicationModel } from "../../modules/communications/communication.model"
-import { ImageInfoI, UserModel } from "../../modules/users/users.model"
+import { ImageInfoI, UserI, UserModel } from "../../modules/users/users.model"
 import communicationService from "../../modules/communications/communication.service"
-import { readMessagesDto } from "./spaces.dto"
+import { getMembersDto, readMessagesDto } from "./spaces.dto"
+import { UserShortPublicResponse } from "../../modules/users/users.responses"
+import { isUserOnline } from "../../socket/socket.utils"
 
 export type LastMessage = {
     text: string,
@@ -37,6 +39,15 @@ export type LastReadSeqResponse = {
     lastReadSeq: number,
     userId: string,
     spaceId: string
+}
+
+export type SpaceMemberResponse = {
+    spaceId: string,
+    user: UserShortPublicResponse,
+    role: SpaceRolesEnum,
+    isMuted: boolean,
+    isBaned: boolean,
+    isOnline: boolean
 }
 
 const spacesService = {
@@ -281,7 +292,28 @@ const spacesService = {
             userId: userId.toString(),
             spaceId: member.spaceId.toString()
         }
-    }
+    },
+
+    async getMembers(data: getMembersDto, userId: Types.ObjectId): Promise<SpaceMemberResponse[]> {
+        const space = await SpaceModel.findById(data.spaceId).lean()
+        if (!space) throw new ErrorWithStatus(404, "Space not found")
+        // if add channel REWRITE
+        if (space.type === SpaceTypesEnum.CHANEL) throw new ErrorWithStatus(400, "You cann't get members in channel")
+        const member = await SpaceMemberModel.findOneOrError({userId, spaceId: data.spaceId})
+        const members = await SpaceMemberModel.find({spaceId: data.spaceId}).populate<{userId: UserI}>("userId", "username _id img").limit(data.limit).skip(data.skip).lean()
+        return members.map(member => ({
+            spaceId: member.spaceId.toString(),
+            user: {
+                username: member.userId.username,
+                img: member.userId.img,
+                id: String(member.userId._id)
+            },
+            role: member.role,
+            isMuted: member.isMuted,
+            isBaned: member.isBaned,
+            isOnline: isUserOnline(String(member.userId._id)) ? true : false
+        }))
+    }   
 }
 
 export default spacesService

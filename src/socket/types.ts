@@ -25,6 +25,7 @@ export interface ClientToServerEvents {
     "spaces:getInfo": (data: any, callback?: SocketAck) => any,
     "spaces:chats:create": (data: any, callback?: SocketAck) => any,
     "spaces:readMessages": (data: any, callback?: SocketAck) => any,
+    "spaces:getMembers": (data: any, callback?: SocketAck) => any,
     "spaces:group:create": (data: any, callback?: SocketAck) => any,
     "spaces:group:addMembers": (data: any, callback?: SocketAck) => any,
     "spaces:group:removeMembers": (data: any, callback?: SocketAck) => any,

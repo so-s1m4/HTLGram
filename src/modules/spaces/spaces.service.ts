@@ -5,7 +5,7 @@ import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware
 import { CommunicationModel } from "../../modules/communications/communication.model"
 import { ImageInfoI, UserI, UserModel } from "../../modules/users/users.model"
 import communicationService from "../../modules/communications/communication.service"
-import { getMembersDto, readMessagesDto } from "./spaces.dto"
+import { getMembersDto, readMessagesDto, togleAdminDto } from "./spaces.dto"
 import { UserShortPublicResponse } from "../../modules/users/users.responses"
 import { isUserOnline } from "../../socket/socket.utils"
 
@@ -47,7 +47,7 @@ export type SpaceMemberResponse = {
     role: SpaceRolesEnum,
     isMuted: boolean,
     isBaned: boolean,
-    isOnline: boolean
+    isOnline?: boolean
 }
 
 const spacesService = {
@@ -179,7 +179,7 @@ const spacesService = {
                     lastMessage: space.lastMessage || undefined,
                     memberCount: space.memberCount,
                     group: {
-                        owner: space.owner
+                        owner: space.space.owner
                     }
                 })
             } else {
@@ -250,7 +250,11 @@ const spacesService = {
                 updatedAt: chat.updatedAt,
                 createdAt: chat.createdAt,
                 lastMessage: lastMessage ? lastMessage : undefined,
-                memberCount
+                memberCount,
+                chat: {
+                    friendId: chat.user1_id.toString() === String(userId) ? chat.user2_id.toString() : chat.user1_id.toString()
+                }
+                
             }
         } else if (space.type === SpaceTypesEnum.GROUP) {
             const group = space as unknown as HydratedDocument<GroupI>
@@ -268,7 +272,10 @@ const spacesService = {
                 updatedAt: group.updatedAt,
                 createdAt: group.createdAt,
                 lastMessage: lastMessage ? lastMessage : undefined,
-                memberCount
+                memberCount,
+                group: {
+                    owner: String(group.owner)
+                }
             }
         }
         return space as unknown as SpacePublicResponse // remove if new types are added
@@ -313,7 +320,54 @@ const spacesService = {
             isBaned: member.isBaned,
             isOnline: isUserOnline(String(member.userId._id)) ? true : false
         }))
-    }   
+    },
+
+    async addAdmin(data: togleAdminDto, userId: Types.ObjectId): Promise<SpaceMemberResponse> {
+        const space = await SpaceModel.findById(data.spaceId).exec()
+        if (!space) throw new ErrorWithStatus(404, "Space not found")
+        if (space.type !== SpaceTypesEnum.GROUP) throw new ErrorWithStatus(400, "You can add admin only for groups")
+        const group = space as unknown as GroupI
+        if (String(group.owner) !== String(userId)) throw new ErrorWithStatus(400, "You are not owner of this space")
+        const member = await SpaceMemberModel.findOne({spaceId: data.spaceId, userId: data.adminId, role: SpaceRolesEnum.MEMBER}).populate<{userId: UserI}>("userId", "username _id img").exec()
+        if (!member) throw new ErrorWithStatus(404, "Member not found")
+        member.role = SpaceRolesEnum.ADMIN
+        await member.save()
+        return {
+            spaceId: member.spaceId.toString(),
+            user: {
+                username: member.userId.username,
+                img: member.userId.img,
+                id: String(member.userId._id)
+            },
+            role: member.role,
+            isMuted: member.isMuted,
+            isBaned: member.isBaned,
+        }
+    },
+
+    async removeAdmin(data: togleAdminDto, userId: Types.ObjectId): Promise<SpaceMemberResponse> {
+        const space = await SpaceModel.findById(data.spaceId).exec()
+        if (!space) throw new ErrorWithStatus(404, "Space not found")
+        if (space.type !== SpaceTypesEnum.GROUP) throw new ErrorWithStatus(400, "You can remove admin only for groups")
+        const group = space as unknown as GroupI
+        if (String(group.owner) !== String(userId)) throw new ErrorWithStatus(400, "You are not owner of this space")
+        if (String(group.owner) === String(data.adminId)) throw new ErrorWithStatus(400, "You cann't make owner an admin")
+        const member = await SpaceMemberModel.findOne({spaceId: data.spaceId, userId: data.adminId, role: SpaceRolesEnum.ADMIN}).populate<{userId: UserI}>("userId", "username _id img").exec()
+        if (!member) throw new ErrorWithStatus(404, "Member not found")
+        member.role = SpaceRolesEnum.MEMBER
+        await member.save()
+        return {
+            spaceId: member.spaceId.toString(),
+            user: {
+                username: member.userId.username,
+                img: member.userId.img,
+                id: String(member.userId._id)
+            },
+            role: member.role,
+            isMuted: member.isMuted,
+            isBaned: member.isBaned,
+        }
+    }
 }
 
 export default spacesService

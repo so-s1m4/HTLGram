@@ -1,6 +1,6 @@
 import { validationWrapper } from "../../common/utils/utils.wrappers";
 import { Types } from "mongoose";
-import { deleteSpaceDto, deleteSpaceSchema, getInfoSpaceDto, getInfoSpaceSchema, getMembersDto, getMembersSchema, readMessagesDto, readMessagesSchema } from "./spaces.dto";
+import { deleteSpaceDto, deleteSpaceSchema, getInfoSpaceDto, getInfoSpaceSchema, getMembersDto, getMembersSchema, readMessagesDto, readMessagesSchema, togleAdminDto, togleAdminSchema } from "./spaces.dto";
 import spacesService from "./spaces.service";
 import { Server } from "socket.io";
 
@@ -32,6 +32,20 @@ const spacesController =  {
         const dto = validationWrapper<getMembersDto>(getMembersSchema, data || {})
         const members = await spacesService.getMembers(dto, userId)
         return members
+    },
+
+    async addAdmin(data: any, userId: Types.ObjectId, io: Server) {
+        const dto = validationWrapper<togleAdminDto>(togleAdminSchema, data || {})
+        const member = await spacesService.addAdmin(dto, userId)
+        io.to(`space:${dto.spaceId}`).emit("space:addedAdmin", member)
+        return member
+    },
+
+    async removeAdmin(data: any, userId: Types.ObjectId, io: Server) {
+        const dto = validationWrapper<togleAdminDto>(togleAdminSchema, data || {})
+        const member = await spacesService.removeAdmin(dto, userId)
+        io.to(`space:${dto.spaceId}`).emit("space:removedAdmin", member)
+        return member
     }
 }
 

@@ -37,3 +37,13 @@ export const getMembersSchema = Joi.object<getMembersDto>({
     limit: Joi.number().min(0).default(50),
     skip: Joi.number().min(0).default(0)
 })
+
+export type togleAdminDto = {
+    spaceId: string,
+    adminId: string,
+}
+
+export const togleAdminSchema = Joi.object<togleAdminDto>({
+    spaceId: Joi.string().trim().min(24).max(24).required(),
+    adminId: Joi.string().trim().min(24).max(24).required(),
+})

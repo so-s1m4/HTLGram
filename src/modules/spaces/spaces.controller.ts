@@ -1,6 +1,6 @@
 import { validationWrapper } from "../../common/utils/utils.wrappers";
 import { Types } from "mongoose";
-import { deleteSpaceDto, deleteSpaceSchema, getInfoSpaceDto, getInfoSpaceSchema, getMembersDto, getMembersSchema, readMessagesDto, readMessagesSchema, togleAdminDto, togleAdminSchema } from "./spaces.dto";
+import { deleteSpaceDto, deleteSpaceSchema, getInfoSpaceDto, getInfoSpaceSchema, getMembersDto, getMembersSchema, leaveDto, leaveSchema, readMessagesDto, readMessagesSchema, togleAdminDto, togleAdminSchema } from "./spaces.dto";
 import spacesService from "./spaces.service";
 import { Server } from "socket.io";
 
@@ -46,7 +46,14 @@ const spacesController =  {
         const member = await spacesService.removeAdmin(dto, userId)
         io.to(`space:${dto.spaceId}`).emit("space:removedAdmin", member)
         return member
-    }
+    },
+
+    async leave(data: any, userId: Types.ObjectId, io: Server) {
+        const dto = validationWrapper<leaveDto>(leaveSchema, data || {})
+        const user = await spacesService.leave(dto, userId)
+        io.to(`space:${dto.spaceId}`).emit("space:memberLeaved", user)
+        return user
+    },
 }
 
 export default spacesController

@@ -47,3 +47,11 @@ export const togleAdminSchema = Joi.object<togleAdminDto>({
     spaceId: Joi.string().trim().min(24).max(24).required(),
     adminId: Joi.string().trim().min(24).max(24).required(),
 })
+
+export type leaveDto = {
+    spaceId: string
+}
+
+export const leaveSchema = Joi.object<leaveDto>({
+    spaceId: Joi.string().trim().min(24).max(24).required()
+})

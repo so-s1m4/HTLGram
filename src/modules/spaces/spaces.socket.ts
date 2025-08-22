@@ -26,6 +26,7 @@ export const spacesHandler = (
     socket.on("spaces:getMembers", socketErrorWrapperWithData(spacesController.getMembers, socket, io)),
     socket.on("spaces:addAdmin", socketErrorWrapperWithData(spacesController.addAdmin, socket, io)),
     socket.on("spaces:removeAdmin", socketErrorWrapperWithData(spacesController.removeAdmin, socket, io)),
+    socket.on("spaces:leave", socketErrorWrapperWithData(spacesController.leave, socket, io)),
 
     socket.on("spaces:chats:create", socketErrorWrapperWithData(chatsController.createChat, socket, io)),
 

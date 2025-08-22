@@ -5,7 +5,7 @@ import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware
 import { CommunicationModel } from "../../modules/communications/communication.model"
 import { ImageInfoI, UserI, UserModel } from "../../modules/users/users.model"
 import communicationService from "../../modules/communications/communication.service"
-import { getMembersDto, readMessagesDto, togleAdminDto } from "./spaces.dto"
+import { getMembersDto, leaveDto, readMessagesDto, togleAdminDto } from "./spaces.dto"
 import { UserShortPublicResponse } from "../../modules/users/users.responses"
 import { isUserOnline } from "../../socket/socket.utils"
 
@@ -204,11 +204,11 @@ const spacesService = {
         const space = await SpaceModel.findById(spaceId)
         if (!space) throw new ErrorWithStatus(404, "Space not found")
         if (
-            space.type === SpaceTypesEnum.GROUP &&
+            (space.type === SpaceTypesEnum.GROUP || space.type === SpaceTypesEnum.CHANEL) &&
             (space as any).owner &&
-            (space as any).owner !== userId
+            String((space as any).owner) !== String(userId)
         ) throw new ErrorWithStatus(400, "You are not owner") 
-        if (space.type === SpaceTypesEnum.POSTS) throw new ErrorWithStatus(400, "Not allowed")
+        if (space.type === SpaceTypesEnum.POSTS) throw new ErrorWithStatus(400, "Not allowed to deleate posts")
         const member = await SpaceMemberModel.findOneOrError({spaceId, userId})
         if ((member).role !== SpaceRolesEnum.ADMIN) throw new ErrorWithStatus(400, "You are not admin")
 
@@ -325,7 +325,7 @@ const spacesService = {
     async addAdmin(data: togleAdminDto, userId: Types.ObjectId): Promise<SpaceMemberResponse> {
         const space = await SpaceModel.findById(data.spaceId).exec()
         if (!space) throw new ErrorWithStatus(404, "Space not found")
-        if (space.type !== SpaceTypesEnum.GROUP) throw new ErrorWithStatus(400, "You can add admin only for groups")
+        if (space.type !== SpaceTypesEnum.GROUP && space.type !== SpaceTypesEnum.CHANEL) throw new ErrorWithStatus(400, "You can add admin only for groups and channels")
         const group = space as unknown as GroupI
         if (String(group.owner) !== String(userId)) throw new ErrorWithStatus(400, "You are not owner of this space")
         const member = await SpaceMemberModel.findOne({spaceId: data.spaceId, userId: data.adminId, role: SpaceRolesEnum.MEMBER}).populate<{userId: UserI}>("userId", "username _id img").exec()
@@ -348,7 +348,7 @@ const spacesService = {
     async removeAdmin(data: togleAdminDto, userId: Types.ObjectId): Promise<SpaceMemberResponse> {
         const space = await SpaceModel.findById(data.spaceId).exec()
         if (!space) throw new ErrorWithStatus(404, "Space not found")
-        if (space.type !== SpaceTypesEnum.GROUP) throw new ErrorWithStatus(400, "You can remove admin only for groups")
+        if (space.type !== SpaceTypesEnum.GROUP && space.type !== SpaceTypesEnum.CHANEL) throw new ErrorWithStatus(400, "You can remove admin only for groups and chanels")
         const group = space as unknown as GroupI
         if (String(group.owner) !== String(userId)) throw new ErrorWithStatus(400, "You are not owner of this space")
         if (String(group.owner) === String(data.adminId)) throw new ErrorWithStatus(400, "You cann't make owner an admin")
@@ -366,6 +366,56 @@ const spacesService = {
             role: member.role,
             isMuted: member.isMuted,
             isBaned: member.isBaned,
+        }
+    },
+
+    async leave(data: leaveDto, userId: Types.ObjectId): Promise<SpaceMemberResponse> {
+        let space = await SpaceModel.findById(data.spaceId).exec()
+        if (!space) throw new ErrorWithStatus(404, "Space not found")
+        if (space.type === SpaceTypesEnum.POSTS || space.type === SpaceTypesEnum.CHAT) throw new ErrorWithStatus(400, "You cann't leave from chat and posts")
+        const member = await SpaceMemberModel.findOne({spaceId: data.spaceId, userId: userId}).populate<{userId: UserI}>("userId", "username _id img").exec()
+        if (!member) throw new ErrorWithStatus(404, "Member not found")
+        const group = space as unknown as HydratedDocument<GroupI>
+        if (String(member.userId._id) !== String(group.owner)) {
+            await member.deleteOne()
+        } else {
+            const memberCount = await SpaceMemberModel.countDocuments({spaceId: data.spaceId})
+            if (memberCount === 1) {
+                await this.deleteSpace(data.spaceId, userId)
+            } else {
+                console.log(1)
+                let featureOwner = await SpaceMemberModel.findOne({
+                    spaceId: data.spaceId,
+                    role: SpaceRolesEnum.ADMIN,
+                    _id: { $ne: member._id }
+                });
+                console.log(featureOwner)
+
+                if (!featureOwner) {
+                    featureOwner = await SpaceMemberModel.findOne({ 
+                        spaceId: data.spaceId,
+                        _id: { $ne: member._id }
+                    });
+                    if (!featureOwner) throw new ErrorWithStatus(404, "Feature owner not found")
+                    featureOwner.role = SpaceRolesEnum.ADMIN
+                    await featureOwner.save()
+                }
+                console.log(featureOwner)
+                group.owner = featureOwner.userId
+                await group.save()
+                await member.deleteOne()
+            }
+        }
+        return {
+            spaceId: String(member.spaceId),
+            user: {
+                id: String(member.userId._id),
+                username: member.userId.username,
+                img: member.userId.img
+            },
+            role: member.role,
+            isMuted: member.isMuted,
+            isBaned: member.isBaned
         }
     }
 }

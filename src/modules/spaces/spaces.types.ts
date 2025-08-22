@@ -31,6 +31,7 @@ export interface ChatI extends BaseSpaceI {
 }
 
 export interface GroupI extends BaseSpaceI {
+    group: Types.ObjectId;
     owner: Schema.Types.ObjectId,
     title: string,
     img: ImageInfoI[]

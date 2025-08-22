@@ -498,7 +498,7 @@ const communicationService = {
         });
 
         if (!res.ok) {
-            throw new ErrorWithStatus(res.status, "Media server error");
+            throw new ErrorWithStatus(res.status, "Media server error: " + res.statusText);
         }
 
         const bulkOps = Array.from(user_storage.entries()).map(([ownerId, size]) => ({

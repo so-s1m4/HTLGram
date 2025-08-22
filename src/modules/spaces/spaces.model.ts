@@ -7,8 +7,7 @@ const SpaceSchema = new Schema<BaseSpaceI>(
     {
         maxMessageSeq: {
             type: Number,
-            default: 0,
-            unique: true
+            default: 0
         }
     },
     {   

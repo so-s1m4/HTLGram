@@ -22,9 +22,11 @@ export type SpacePublicResponse = {
     img: ImageInfoI[],
     updatedAt: Date,
     createdAt: Date,
+    role: SpaceRolesEnum,
+    isMuted: boolean,
+    isBaned: boolean,
     lastMessage?: LastMessage,
 
-    // later
     memberCount: number,
     chat?: {
         friendId: string
@@ -162,6 +164,9 @@ const spacesService = {
                     img: space.space.user1_id.toString() === String(userId) ? space.user2.img : space.user1.img,
                     updatedAt: space.space.updatedAt,
                     createdAt: space.space.createdAt,
+                    role: space.role,
+                    isMuted: space.isMuted,
+                    isBaned: space.isBaned,
                     lastMessage: space.lastMessage || undefined,
                     memberCount: space.memberCount,
                     chat: {
@@ -176,6 +181,9 @@ const spacesService = {
                     img: space.space.img,
                     updatedAt: space.space.updatedAt,
                     createdAt: space.space.createdAt,
+                    role: space.role,
+                    isMuted: space.isMuted,
+                    isBaned: space.isBaned,
                     lastMessage: space.lastMessage || undefined,
                     memberCount: space.memberCount,
                     group: {
@@ -190,6 +198,9 @@ const spacesService = {
                     img: space.space.img,
                     updatedAt: space.space.updatedAt,
                     createdAt: space.space.createdAt,
+                    role: space.role,
+                    isMuted: space.isMuted,
+                    isBaned: space.isBaned,
                     lastMessage: space.lastMessage || undefined,
                     memberCount: space.memberCount
                 })
@@ -249,6 +260,9 @@ const spacesService = {
                 img: user.img,
                 updatedAt: chat.updatedAt,
                 createdAt: chat.createdAt,
+                role: member.role,
+                isMuted: member.isMuted,
+                isBaned: member.isBaned,
                 lastMessage: lastMessage ? lastMessage : undefined,
                 memberCount,
                 chat: {
@@ -271,6 +285,9 @@ const spacesService = {
                 img: group.img,
                 updatedAt: group.updatedAt,
                 createdAt: group.createdAt,
+                role: member.role,
+                isMuted: member.isMuted,
+                isBaned: member.isBaned,
                 lastMessage: lastMessage ? lastMessage : undefined,
                 memberCount,
                 group: {

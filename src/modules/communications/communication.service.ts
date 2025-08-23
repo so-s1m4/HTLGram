@@ -20,9 +20,7 @@ export type MediaResponse = {
     type: string,
     mime: string,
     size: number,
-    path: string,
-    createdAt: Date,
-    updatedAt: Date,
+    path: string
 }
 
 

@@ -2,9 +2,9 @@ import { HydratedDocument, Types } from "mongoose"
 import { SpaceMemberModel, SpaceModel } from "./spaces.model"
 import { ChatI, GroupI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types"
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
-import { CommunicationModel } from "../../modules/communications/communication.model"
+import { CommunicationModel, PayloadModel } from "../../modules/communications/communication.model"
 import { ImageInfoI, UserI, UserModel } from "../../modules/users/users.model"
-import communicationService from "../../modules/communications/communication.service"
+import communicationService, { MediaResponse } from "../../modules/communications/communication.service"
 import { getMembersDto, leaveDto, readMessagesDto, togleAdminDto } from "./spaces.dto"
 import { UserShortPublicResponse } from "../../modules/users/users.responses"
 import { isUserOnline } from "../../socket/socket.utils"
@@ -26,14 +26,16 @@ export type SpacePublicResponse = {
     isMuted: boolean,
     isBaned: boolean,
     lastMessage?: LastMessage,
-
     memberCount: number,
+    media?: MediaResponse[],
+
     chat?: {
         friendId: string
     }
 
     group?: {
         owner: string
+        members?: SpaceMemberResponse[]
     }
 }
 
@@ -243,6 +245,16 @@ const spacesService = {
         const member = await SpaceMemberModel.findOneOrError({spaceId, userId})
         const space = await SpaceModel.findById(spaceId).lean()
         if (!space) throw new ErrorWithStatus(404, "Space not found")
+        const medias = await PayloadModel.find({spaceId}).exec()
+        const mediasR = medias.map(media => ({
+            id: String(media._id),
+            communicationId: String(media.communicationId),
+            owner: String(media.owner),
+            type: media.type,
+            mime: media.mime,
+            size: media.size,
+            path: media.path
+        }))
         if (space.type === SpaceTypesEnum.CHAT) {
             const chat = space as unknown as HydratedDocument<ChatI>
             const user = await UserModel.findOne({_id: String(chat.user1_id) === String(userId) ? chat.user2_id : chat.user1_id}).select<{img: ImageInfoI[], username: string}>("img username").lean()
@@ -265,6 +277,7 @@ const spacesService = {
                 isBaned: member.isBaned,
                 lastMessage: lastMessage ? lastMessage : undefined,
                 memberCount,
+                media: mediasR,
                 chat: {
                     friendId: chat.user1_id.toString() === String(userId) ? chat.user2_id.toString() : chat.user1_id.toString()
                 }
@@ -277,7 +290,8 @@ const spacesService = {
                 isConfirmed: true,
                 text: { $regex: /^.{2,}/ }
             }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date}>("text createdAt editedAt -_id").lean()
-            const memberCount = await SpaceMemberModel.countDocuments({spaceId: group._id})
+            // const memberCount = await SpaceMemberModel.countDocuments({spaceId: group._id})
+            const members = await SpaceMemberModel.find({spaceId}).populate<{userId: UserI}>("userId", "username _id img").exec()
             return {
                 id: group._id.toString(),
                 title: group.title,
@@ -289,8 +303,20 @@ const spacesService = {
                 isMuted: member.isMuted,
                 isBaned: member.isBaned,
                 lastMessage: lastMessage ? lastMessage : undefined,
-                memberCount,
+                memberCount: members.length,
+                media: mediasR,
                 group: {
+                    members: members.map(member => ({
+                        spaceId: member.spaceId.toString(),
+                        user: {
+                            id: String(member.userId._id),
+                            username: member.userId.username,
+                            img: member.userId.img
+                        },
+                        role: member.role,
+                        isMuted: member.isMuted,
+                        isBaned: member.isBaned
+                    })),
                     owner: String(group.owner)
                 }
             }

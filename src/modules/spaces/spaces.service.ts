@@ -34,7 +34,7 @@ export type SpacePublicResponse = {
     }
 
     group?: {
-        owner: string
+        owner: UserShortPublicResponse | undefined,
         members?: SpaceMemberResponse[]
     }
 }
@@ -70,6 +70,20 @@ const spacesService = {
             },
             {
                 $unwind: "$space"
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "space.owner",
+                    foreignField: "_id",
+                    as: "owner"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$owner",
+                    preserveNullAndEmptyArrays: true
+                }
             },
             {
                 $lookup: {
@@ -150,6 +164,7 @@ const spacesService = {
                     user1: 1,
                     user2: 1,
                     memberCount: 1,
+                    owner: 1,
                     "lastMessage.text": 1,
                     "lastMessage.createdAt": 1,
                     "lastMessage.editedAt": 1
@@ -189,7 +204,11 @@ const spacesService = {
                     lastMessage: space.lastMessage || undefined,
                     memberCount: space.memberCount,
                     group: {
-                        owner: space.space.owner
+                        owner: space.owner ? {
+                            id: String(space.owner._id),
+                            username: space.owner.username,
+                            img: space.owner.img
+                        } : undefined
                     }
                 })
             } else {
@@ -292,6 +311,7 @@ const spacesService = {
             }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date}>("text createdAt editedAt -_id").lean()
             // const memberCount = await SpaceMemberModel.countDocuments({spaceId: group._id})
             const members = await SpaceMemberModel.find({spaceId}).populate<{userId: UserI}>("userId", "username _id img").exec()
+            const owner = await UserModel.findOneOrError({_id: group.owner})
             return {
                 id: group._id.toString(),
                 title: group.title,
@@ -317,7 +337,11 @@ const spacesService = {
                         isMuted: member.isMuted,
                         isBaned: member.isBaned
                     })),
-                    owner: String(group.owner)
+                    owner: {
+                        id: String(owner._id),
+                        username: owner.username,
+                        img: owner.img
+                    }
                 }
             }
         }

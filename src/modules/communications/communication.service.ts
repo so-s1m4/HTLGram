@@ -20,9 +20,7 @@ export type MediaResponse = {
     type: string,
     mime: string,
     size: number,
-    path: string,
-    createdAt: Date,
-    updatedAt: Date,
+    path: string
 }
 
 
@@ -498,7 +496,7 @@ const communicationService = {
         });
 
         if (!res.ok) {
-            throw new ErrorWithStatus(res.status, "Media server error");
+            throw new ErrorWithStatus(res.status, "Media server error: " + res.statusText);
         }
 
         const bulkOps = Array.from(user_storage.entries()).map(([ownerId, size]) => ({

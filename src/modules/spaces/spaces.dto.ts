@@ -4,7 +4,7 @@ export type deleteSpaceDto = {
     spaceId: string
 }
 
-export const deleteSpaceSchema = Joi.object({
+export const deleteSpaceSchema = Joi.object<deleteSpaceDto>({
     spaceId: Joi.string().trim().min(24).max(24).required()
 })
 
@@ -12,7 +12,7 @@ export type getInfoSpaceDto = {
     spaceId: string
 }
 
-export const getInfoSpaceSchema = Joi.object({
+export const getInfoSpaceSchema = Joi.object<getInfoSpaceDto>({
     spaceId: Joi.string().trim().min(24).max(24).required()
 })
 
@@ -21,7 +21,53 @@ export type readMessagesDto = {
     messageSeq: number
 }
 
-export const readMessagesSchema = Joi.object({
+export const readMessagesSchema = Joi.object<readMessagesDto>({
     spaceId: Joi.string().trim().min(24).max(24).required(),
     messageSeq: Joi.number().positive().required()
 })
+
+export type getMembersDto = {
+    spaceId: string,
+    limit: number,
+    skip: number
+}
+
+export const getMembersSchema = Joi.object<getMembersDto>({
+    spaceId: Joi.string().trim().min(24).max(24).required(),
+    limit: Joi.number().min(0).default(50),
+    skip: Joi.number().min(0).default(0)
+})
+
+export type togleAdminDto = {
+    spaceId: string,
+    adminId: string,
+}
+
+export const togleAdminSchema = Joi.object<togleAdminDto>({
+    spaceId: Joi.string().trim().min(24).max(24).required(),
+    adminId: Joi.string().trim().min(24).max(24).required(),
+})
+
+export type leaveDto = {
+    spaceId: string
+}
+
+export const leaveSchema = Joi.object<leaveDto>({
+    spaceId: Joi.string().trim().min(24).max(24).required()
+})
+
+export type updateSpaceDto = {
+    title?: string,
+    file?: {
+        filename: string;
+        size: number;
+    }
+}
+
+export const updateSpaceSchema = Joi.object<updateSpaceDto>({
+    title: Joi.string().trim().min(3).max(64).optional(),
+    file: Joi.object({
+        filename: Joi.string().trim().required(),
+        size: Joi.number().min(0).required()
+    }).optional()
+}).min(1)

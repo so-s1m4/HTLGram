@@ -55,7 +55,7 @@ async function connectToRooms(socket: Socket) {
   try {
     const spaces = await spacesService.getSpacesList(socket.data.user.userId);
     for (const space of spaces) {
-      socket.join(`${space.type}:${space.id}`);
+      socket.join(`space:${space.id}`);
     }
   } catch (e) {
     console.error("Failed to join rooms", e);

@@ -52,6 +52,7 @@ const usersService = {
         if (data.name) user.name = data.name;
         if (data.description) user.description = data.description;
         if (data.file) {
+            if (user.img.length >= 5) throw new ErrorWithStatus(400, "You alreade have 5 photos uploaded")
             user.img.push({ path: data.file.filename, size: data.file.size });
         }
         await user.save();

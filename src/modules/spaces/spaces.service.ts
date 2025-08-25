@@ -8,6 +8,7 @@ import communicationService, { MediaResponse } from "../../modules/communication
 import { getMembersDto, leaveDto, readMessagesDto, togleAdminDto, updateSpaceDto } from "./spaces.dto"
 import { UserShortPublicResponse } from "../../modules/users/users.responses"
 import { isUserOnline } from "../../socket/socket.utils"
+import deleteFile from "../../common/utils/utils.deleteFile"
 
 export type LastMessage = {
     text: string,
@@ -498,12 +499,15 @@ const spacesService = {
         const space = await GroupModel.findById(spaceId).exec()
         // Edit if channel is added
         if (!space) throw new ErrorWithStatus(404, "Group not found")
+        console.log(space.img)
+        console.log(data.file)
         if (data.title) space.title = data.title
         if (data.file) {
             if (space.img.length >= 5) throw new ErrorWithStatus(400, "You alreade have 5 photos uploaded")
             space.img.push({path: data.file.filename, size: data.file.size})
         }
         await space.save()
+        console.log(space.img)
         return {
             id: String(space._id),
             title: space.title,
@@ -512,6 +516,20 @@ const spacesService = {
             updatedAt: space.updatedAt,
             createdAt: space.createdAt
         }
+    },
+
+    async deleteSpacePhoto(userId: Types.ObjectId, spaceId: Types.ObjectId, photoPath: string) {
+        const member = await SpaceMemberModel.findOneOrError({spaceId, userId})
+        if (member.role !== SpaceRolesEnum.ADMIN) throw new ErrorWithStatus(400, "You are not admin")
+        const space = await GroupModel.findById(spaceId).exec()
+        // Edit if channel is added
+        if (!space) throw new ErrorWithStatus(404, "Group not found")
+        
+        const idx = space.img.findIndex((p) => p.path === photoPath);
+        if (idx === undefined || idx < 0) throw new ErrorWithStatus(404, 'Photo not found');
+        space.img.splice(idx, 1);
+        deleteFile(photoPath);
+        await space.save();
     }
 }
 

@@ -242,7 +242,7 @@ const spacesService = {
         return res
     },
 
-    async deleteSpace(spaceId: string, userId: Types.ObjectId): Promise<{deleted: boolean, spaceId: string}> {
+    async deleteSpace(spaceId: string, userId: Types.ObjectId): Promise<{members: string[], spaceId: string, spaceType: string}> {
         const space = await SpaceModel.findById(spaceId)
         if (!space) throw new ErrorWithStatus(404, "Space not found")
         if (
@@ -265,9 +265,14 @@ const spacesService = {
             )
         }
         
+        const members = await SpaceMemberModel.find({ spaceId }).exec()
         await SpaceMemberModel.deleteMany({ spaceId }).exec()
         await space.deleteOne()
-        return { deleted: true, spaceId}
+        return { 
+            members: members.map(member => String(member._id)), 
+            spaceId,
+            spaceType: space.type
+        }
     },
 
     async getInfo(spaceId: string, userId: Types.ObjectId): Promise<SpacePublicResponse> {

@@ -1,11 +1,11 @@
 import { HydratedDocument, Types } from "mongoose"
-import { SpaceMemberModel, SpaceModel } from "./spaces.model"
+import { GroupModel, SpaceMemberModel, SpaceModel } from "./spaces.model"
 import { ChatI, GroupI, SpaceRolesEnum, SpaceTypesEnum } from "./spaces.types"
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware"
 import { CommunicationModel, PayloadModel } from "../../modules/communications/communication.model"
 import { ImageInfoI, UserI, UserModel } from "../../modules/users/users.model"
 import communicationService, { MediaResponse } from "../../modules/communications/communication.service"
-import { getMembersDto, leaveDto, readMessagesDto, togleAdminDto } from "./spaces.dto"
+import { getMembersDto, leaveDto, readMessagesDto, togleAdminDto, updateSpaceDto } from "./spaces.dto"
 import { UserShortPublicResponse } from "../../modules/users/users.responses"
 import { isUserOnline } from "../../socket/socket.utils"
 
@@ -13,6 +13,15 @@ export type LastMessage = {
     text: string,
     createdAt: Date, 
     editedAt: Date
+}
+
+export type SpaceShortResponse = {
+    id: string,
+    title: string,
+    type: SpaceTypesEnum,
+    img: ImageInfoI[],
+    updatedAt: Date,
+    createdAt: Date,
 }
 
 export type SpacePublicResponse = {
@@ -26,7 +35,7 @@ export type SpacePublicResponse = {
     isMuted: boolean,
     isBaned: boolean,
     lastMessage?: LastMessage,
-    memberCount: number,
+    memberCount?: number,
     media?: MediaResponse[],
 
     chat?: {
@@ -450,13 +459,11 @@ const spacesService = {
             if (memberCount === 1) {
                 await this.deleteSpace(data.spaceId, userId)
             } else {
-                console.log(1)
                 let featureOwner = await SpaceMemberModel.findOne({
                     spaceId: data.spaceId,
                     role: SpaceRolesEnum.ADMIN,
                     _id: { $ne: member._id }
                 });
-                console.log(featureOwner)
 
                 if (!featureOwner) {
                     featureOwner = await SpaceMemberModel.findOne({ 
@@ -467,7 +474,6 @@ const spacesService = {
                     featureOwner.role = SpaceRolesEnum.ADMIN
                     await featureOwner.save()
                 }
-                console.log(featureOwner)
                 group.owner = featureOwner.userId
                 await group.save()
                 await member.deleteOne()
@@ -483,6 +489,28 @@ const spacesService = {
             role: member.role,
             isMuted: member.isMuted,
             isBaned: member.isBaned
+        }
+    },
+
+    async updateSpaceData(data: updateSpaceDto, userId: Types.ObjectId, spaceId: Types.ObjectId): Promise<SpaceShortResponse> {
+        const member = await SpaceMemberModel.findOneOrError({spaceId, userId})
+        if (member.role !== SpaceRolesEnum.ADMIN) throw new ErrorWithStatus(400, "You are not admin")
+        const space = await GroupModel.findById(spaceId).exec()
+        // Edit if channel is added
+        if (!space) throw new ErrorWithStatus(404, "Group not found")
+        if (data.title) space.title = data.title
+        if (data.file) {
+            if (space.img.length >= 5) throw new ErrorWithStatus(400, "You alreade have 5 photos uploaded")
+            space.img.push({path: data.file.filename, size: data.file.size})
+        }
+        await space.save()
+        return {
+            id: String(space._id),
+            title: space.title,
+            type: SpaceTypesEnum.GROUP,
+            img: space.img,
+            updatedAt: space.updatedAt,
+            createdAt: space.createdAt
         }
     }
 }

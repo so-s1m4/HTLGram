@@ -55,3 +55,19 @@ export type leaveDto = {
 export const leaveSchema = Joi.object<leaveDto>({
     spaceId: Joi.string().trim().min(24).max(24).required()
 })
+
+export type updateSpaceDto = {
+    title?: string,
+    file?: {
+        filename: string;
+        size: number;
+    }
+}
+
+export const updateSpaceSchema = Joi.object<updateSpaceDto>({
+    title: Joi.string().trim().min(3).max(64).optional(),
+    file: Joi.object({
+        filename: Joi.string().trim().required(),
+        size: Joi.number().min(0).required()
+    }).optional()
+}).min(1)

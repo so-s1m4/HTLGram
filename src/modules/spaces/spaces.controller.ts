@@ -3,6 +3,8 @@ import { Types } from "mongoose";
 import { deleteSpaceDto, deleteSpaceSchema, getInfoSpaceDto, getInfoSpaceSchema, getMembersDto, getMembersSchema, leaveDto, leaveSchema, readMessagesDto, readMessagesSchema, togleAdminDto, togleAdminSchema } from "./spaces.dto";
 import spacesService from "./spaces.service";
 import { Server } from "socket.io";
+import { SpaceTypesEnum } from "./spaces.types";
+import { removeSocketFromSpaceIfOnline } from "../../socket/socket.utils";
 
 const spacesController =  {
     async getSpacesList(userId: Types.ObjectId) {
@@ -11,9 +13,12 @@ const spacesController =  {
 
     async deleteSpace(data: any, userId: Types.ObjectId, io: Server) {
         const dto = validationWrapper<deleteSpaceDto>(deleteSpaceSchema, data|| {})
-        const space =  await spacesService.deleteSpace(dto.spaceId, userId)
-        io.to(`space:${space.spaceId}`).emit("space:deleted", space)
-        return space
+        const {members, spaceId, spaceType} =  await spacesService.deleteSpace(dto.spaceId, userId)
+        for (let id of members) {
+            removeSocketFromSpaceIfOnline({type: spaceType, id: spaceId}, id, io)
+        }
+        io.to(`space:${spaceId}`).emit("space:deleted", {spaceId})
+        return spaceId
     },
 
     async getInfo(data: any, userId: Types.ObjectId) {
@@ -51,6 +56,7 @@ const spacesController =  {
     async leave(data: any, userId: Types.ObjectId, io: Server) {
         const dto = validationWrapper<leaveDto>(leaveSchema, data || {})
         const user = await spacesService.leave(dto, userId)
+        removeSocketFromSpaceIfOnline({type: SpaceTypesEnum.GROUP, id: dto.spaceId}, user.user.id, io)
         io.to(`space:${dto.spaceId}`).emit("space:memberLeaved", user)
         return user
     },

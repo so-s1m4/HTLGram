@@ -269,7 +269,7 @@ const spacesService = {
         await SpaceMemberModel.deleteMany({ spaceId }).exec()
         await space.deleteOne()
         return { 
-            members: members.map(member => String(member._id)), 
+            members: members.map(member => String(member.userId)), 
             spaceId,
             spaceType: space.type
         }

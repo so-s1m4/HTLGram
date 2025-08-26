@@ -16,11 +16,12 @@ import { EmojiCommunicationWithoutSpaceResponse } from "../../modules/emojis/emo
 export type MediaResponse = {
     id: string,
     communicationId: string,
-    owner: string,
+    owner: UserShortPublicResponse | string,
     type: string,
     mime: string,
     size: number,
-    path: string
+    path: string,
+    createdAt: string
 }
 
 

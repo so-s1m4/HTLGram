@@ -6,7 +6,7 @@ import { CommunicationModel, PayloadModel } from "../../modules/communications/c
 import { ImageInfoI, UserI, UserModel } from "../../modules/users/users.model"
 import communicationService, { MediaResponse } from "../../modules/communications/communication.service"
 import { getMembersDto, leaveDto, readMessagesDto, togleAdminDto, updateSpaceDto } from "./spaces.dto"
-import { UserShortPublicResponse } from "../../modules/users/users.responses"
+import { ImageInfoR, UserShortPublicResponse } from "../../modules/users/users.responses"
 import { isUserOnline } from "../../socket/socket.utils"
 import deleteFile from "../../common/utils/utils.deleteFile"
 
@@ -279,15 +279,20 @@ const spacesService = {
         const member = await SpaceMemberModel.findOneOrError({spaceId, userId})
         const space = await SpaceModel.findById(spaceId).lean()
         if (!space) throw new ErrorWithStatus(404, "Space not found")
-        const medias = await PayloadModel.find({spaceId}).exec()
+        const medias = await PayloadModel.find({spaceId}).populate<{owner: {username: string, _id: Types.ObjectId, img: ImageInfoR[]}}>("owner", "username _id img").exec()
         const mediasR = medias.map(media => ({
             id: String(media._id),
             communicationId: String(media.communicationId),
-            owner: String(media.owner),
+            owner: {
+                id: String(media.owner._id),
+                username: media.owner.username,
+                img: media.owner.img
+            },
             type: media.type,
             mime: media.mime,
             size: media.size,
-            path: media.path
+            path: media.path,
+            createdAt: media.createdAt
         }))
         if (space.type === SpaceTypesEnum.CHAT) {
             const chat = space as unknown as HydratedDocument<ChatI>
@@ -504,15 +509,12 @@ const spacesService = {
         const space = await GroupModel.findById(spaceId).exec()
         // Edit if channel is added
         if (!space) throw new ErrorWithStatus(404, "Group not found")
-        console.log(space.img)
-        console.log(data.file)
         if (data.title) space.title = data.title
         if (data.file) {
             if (space.img.length >= 5) throw new ErrorWithStatus(400, "You alreade have 5 photos uploaded")
             space.img.push({path: data.file.filename, size: data.file.size})
         }
         await space.save()
-        console.log(space.img)
         return {
             id: String(space._id),
             title: space.title,

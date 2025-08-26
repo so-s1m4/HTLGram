@@ -17,7 +17,8 @@ export interface PayloadI extends Document {
     type: PayloadTypesEnum,
     mime: string,
     size: number,
-    path: string
+    path: string,
+    createdAt: string
 }
 
 

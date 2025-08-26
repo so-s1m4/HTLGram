@@ -16,13 +16,12 @@ import { EmojiCommunicationWithoutSpaceResponse } from "../../modules/emojis/emo
 export type MediaResponse = {
     id: string,
     communicationId: string,
-    owner: string,
+    owner: UserShortPublicResponse | string,
     type: string,
     mime: string,
     size: number,
     path: string,
-    createdAt: Date,
-    updatedAt: Date,
+    createdAt: string
 }
 
 
@@ -498,7 +497,7 @@ const communicationService = {
         });
 
         if (!res.ok) {
-            throw new ErrorWithStatus(res.status, "Media server error");
+            throw new ErrorWithStatus(res.status, "Media server error: " + res.statusText);
         }
 
         const bulkOps = Array.from(user_storage.entries()).map(([ownerId, size]) => ({

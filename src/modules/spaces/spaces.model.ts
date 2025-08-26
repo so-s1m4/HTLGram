@@ -1,13 +1,13 @@
 import { model, Schema, SchemaTimestampsConfig, Types } from "mongoose";
-import { BaseSpaceI, ChatI, PostsI, SpaceMemberI, SpaceMemberModelI, SpaceRolesEnum, SpaceTypesEnum} from "./spaces.types";
+import { BaseSpaceI, ChatI, GroupI, PostsI, SpaceMemberI, SpaceMemberModelI, SpaceRolesEnum, SpaceTypesEnum} from "./spaces.types";
 import { ErrorWithStatus } from "../../common/middlewares/errorHandlerMiddleware";
+import { imageInfoSchema } from "../../modules/users/users.model";
 
 const SpaceSchema = new Schema<BaseSpaceI>(
     {
         maxMessageSeq: {
             type: Number,
-            default: 0,
-            unique: true
+            default: 0
         }
     },
     {   
@@ -76,6 +76,33 @@ PostsSchema.index(
 export const PostsModel = SpaceModel.discriminator<PostsI>(SpaceTypesEnum.POSTS, PostsSchema)
 
 
+const GroupSchema = new Schema<GroupI>(
+    {
+        owner: {
+            type: Types.ObjectId,
+            ref: "User",
+            required: true
+        },
+        title: {
+            type: String,
+            required: true,
+            maxLength: 25
+        },
+        img: {
+            type: [imageInfoSchema],
+            default: [],
+            validate: {
+                validator: arr => arr.length <= 10,
+                message: 'Cannot have more than 10 images'
+            }
+        }
+    },
+    {
+        discriminatorKey: 'type'
+    }
+)
+
+export const GroupModel = SpaceModel.discriminator<GroupI>(SpaceTypesEnum.GROUP, GroupSchema)
 
 
 const SpaceMemberSchema = new Schema<SpaceMemberI, SpaceMemberModelI>(
@@ -121,5 +148,11 @@ const SpaceMemberSchema = new Schema<SpaceMemberI, SpaceMemberModelI>(
         },
     }
 )
+
+SpaceMemberSchema.index(
+  { spaceId: 1, userId: 1 },
+  { unique: true }
+);
+
 
 export const SpaceMemberModel = model<SpaceMemberI, SpaceMemberModelI>("SpaceMember", SpaceMemberSchema)

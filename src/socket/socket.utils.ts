@@ -13,9 +13,25 @@ export function addSocketToNewSpaceIfOnline(space: spaceForaddSockettoNewSpaceIf
     for (const socket_id of sockets) {
         const socket = io.sockets.sockets.get(socket_id)
         if (!socket) continue
-        socket.join(`${space.type}:${space.id}`)
+        socket.join(`space:${space.id}`)
 
         socket.emit("space:addedToNew", space)
+    }
+    
+}
+
+export async function removeSocketFromSpaceIfOnline(space: spaceForaddSockettoNewSpaceIfOnline, userId: string, io: Server) {
+    const sockets = isUserOnline(userId)
+    const room = `space:${space.id}`;
+    if (!sockets) return
+    for (const socket_id of sockets) {
+        const socket = io.sockets.sockets.get(socket_id)
+        if (!socket) continue
+        
+        if (socket.rooms.has(room)) {
+            await socket.leave(room);
+            socket.emit("space:removedFromSpace", space)
+        }
     }
     
 }

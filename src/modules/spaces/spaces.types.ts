@@ -1,7 +1,7 @@
 import { HydratedDocument, Model, Schema } from "mongoose";
 
 export const enum SpaceTypesEnum {
-    POSTS = "Posts",
+    POSTS = "posts",
     CHAT = "chat",
     CHANEL = "channel",
     GROUP = "group"
@@ -26,6 +26,13 @@ export interface PostsI extends BaseSpaceI {
 export interface ChatI extends BaseSpaceI {
     user1_id: Schema.Types.ObjectId,
     user2_id: Schema.Types.ObjectId
+}
+
+export interface GroupI extends BaseSpaceI {
+    group: Types.ObjectId;
+    owner: Schema.Types.ObjectId,
+    title: string,
+    img: ImageInfoI[]
 }
 
 export enum SpaceRolesEnum {

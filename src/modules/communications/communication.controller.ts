@@ -14,7 +14,7 @@ const communicationController = {
         const dto = validationWrapper<closeCommunicationDto>(closeCommunicationSchema, data)
         const communication = await communicationService.close(dto, userId)
         if (communication.isNew) {
-            io.to(`chat:${communication.communication.spaceId}`).emit("communication:newMessage", communication.communication)
+            io.to(`space:${communication.communication.spaceId}`).emit("communication:newMessage", communication.communication)
         }
         return communication.communication
     },
@@ -27,7 +27,7 @@ const communicationController = {
     async update(data: any, userId: Types.ObjectId, io: Server, socket: Socket) {
         const dto = validationWrapper<updateCommunicationDto>(updateCommunicationSchema, data)
         const communication = await communicationService.update(dto, userId)
-        socket.broadcast.to(`chat:${communication.spaceId}`).emit("communication:editMessage", communication)
+        socket.broadcast.to(`space:${communication.spaceId}`).emit("communication:editMessage", communication)
         return communication
     },
 
@@ -35,7 +35,7 @@ const communicationController = {
         const dto = validationWrapper<deleteMediaCommunicationDto>(deleteMediaCommunicationSchema, data)
         const medias = await communicationService.deleteMedias(dto, userId)
         for (let media of medias) {
-            io.to(`chat:${media.spaceId}`).emit("communication:deleteMedia", media)
+            io.to(`space:${media.spaceId}`).emit("communication:deleteMedia", media)
         }
         return medias  
     },
@@ -44,7 +44,7 @@ const communicationController = {
         const dto = validationWrapper<deleteMessagesCommunicationDto>(deleteMessagesCommunicationSchema, data)
         const messages = await communicationService.deleteMessages(dto, userId)
         for (let message of messages) {
-            io.to(`chat:${message.spaceId}`).emit("communication:deleteMessage", message)
+            io.to(`space:${message.spaceId}`).emit("communication:deleteMessage", message)
         }
         return messages  
     }

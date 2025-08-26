@@ -29,8 +29,10 @@ app.use(express.json())
 
 // ROUTES
 import usersRouter from './modules/users/users.routes'
+import spacesRouter from './modules/spaces/spaces.routes'
 
 app.use('/api/users', usersRouter)
+app.use('/api/spaces', spacesRouter)
 
 
 // Additional handlers

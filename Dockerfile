@@ -8,6 +8,7 @@ FROM node:latest
 COPY package.json /app/
 COPY src /app/
 COPY tsconfig.json /app/
+COPY emoji.json /app/
 
 WORKDIR /app
 

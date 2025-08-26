@@ -1,4 +1,5 @@
-import { HydratedDocument, Model, Schema } from "mongoose";
+import { ImageInfoI } from "../../modules/users/users.model";
+import { HydratedDocument, Model, Schema, Types } from "mongoose";
 
 export const enum SpaceTypesEnum {
     POSTS = "posts",

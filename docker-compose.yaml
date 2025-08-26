@@ -1,25 +1,49 @@
 version: '3'
 services:
-  hltgram-app:
-    image: hltgram
+  htlgram-main-server:
+    image: leu3ery/htlgram-main-server:1.0
     ports: 
       - "8000:8000"
     volumes:
-      - public-data:/var/lib/htlgram/public
+      - htlgram-main-public-data:/var/lib/htlgram/public
     environment: 
-      - PORT=8000
-      - JWT_SECRET=secret
-      - MONGO_URI=mongodb://leuzery:qwerty@mongodb:27017
-      - PASSWORD_SALT=5
+      PORT: "8000"
+      JWT_SECRET: ${JWT_SECRET_COMPOSE}
+      MONGO_URI: ${MONGO_URI_COMPOSE}
+      PASSWORD_SALT: "10"
+      TIME_TO_DELETE_COMMUNICATION: "10" #min
+      MEDIA_SERVER: "http://htlgram-media-server:8001"
+      SEED_EMOJIS: "false" # Set to true to seed emojis on server start
+      PRIVATE_KEY_PATH: "jwtRS256.key"
+      PRIVATE_KEY_BASE64: ${PRIVATE_KEY_BASE64_COMPOSE}
+    depends_on:
+      - mongodb
+      - htlgram-media-server
+  htlgram-media-server:
+    image: leu3ery/htlgram-media-server:1.0
+    ports: 
+      - "8001:8001"
+    volumes:
+      - htlgram-media-public-data:/var/lib/htlgram/public
+    environment: 
+      PORT: "8001"
+      JWT_SECRET: ${JWT_SECRET_COMPOSE}
+      MONGO_URI: ${MONGO_URI_COMPOSE}
+      MAX_FILE_SIZE: "50"
+      MAX_USER_STORAGE: "1000"
+      PUBLIC_KEY_PATH: "jwtRS256.key.pub"
+      PUBLIC_KEY_BASE64: ${PUBLIC_KEY_BASE64_COMPOSE}
     depends_on:
       - mongodb
   mongodb:
     image: mongodb/mongodb-community-server:latest
     environment:
-      MONGO_INITDB_ROOT_USERNAME: leuzery
-      MONGO_INITDB_ROOT_PASSWORD: qwerty
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - mongodb-data:/data/db
+
 volumes:
   mongodb-data:
-  public-data:
+  htlgram-main-public-data:
+  htlgram-media-public-data:

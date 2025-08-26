@@ -6,8 +6,8 @@ import { CommunicationI } from "../../modules/communications/communication.types
 import { UserI } from "../../modules/users/users.model";
 import { CommunicationModel } from "../../modules/communications/communication.model";
 import { SpaceMemberModel, SpaceModel } from "../../modules/spaces/spaces.model";
-import { SpaceTypesEnum } from "modules/spaces/spaces.types";
-import { UserShortPublicResponse } from "modules/users/users.responses";
+import { SpaceTypesEnum } from "../../modules/spaces/spaces.types";
+import { UserShortPublicResponse } from "../../modules/users/users.responses";
 
 export type EmojiResponse = {
     emojiUniqueId: string;

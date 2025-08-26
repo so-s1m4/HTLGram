@@ -92,7 +92,7 @@ const GroupSchema = new Schema<GroupI>(
             type: [imageInfoSchema],
             default: [],
             validate: {
-                validator: arr => arr.length <= 10,
+                validator: (arr: any[]) => arr.length <= 10,
                 message: 'Cannot have more than 10 images'
             }
         }

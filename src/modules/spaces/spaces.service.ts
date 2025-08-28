@@ -38,6 +38,7 @@ export type SpacePublicResponse = {
     lastMessage?: LastMessage,
     memberCount?: number,
     media?: MediaResponse[],
+    unreadCount?: number,
 
     chat?: {
         friendId: string
@@ -165,6 +166,33 @@ const spacesService = {
                 }
             },
             {
+                $lookup: {
+                    from: "communications",
+                    let: { spaceId: "$spaceId", lrs: "$lastReadSeq"},
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        {$eq: ["$spaceId", "$$spaceId"]},
+                                        {$gt: ["$seq", "$$lrs"]}
+                                    ]
+                                }
+                            }
+                        },
+                        {$count: "cnt"}
+                    ],
+                    as: "unreadStat"
+                }
+            },
+            {
+                $addFields: {
+                    unreadCount: {
+                        $ifNull: [{ $arrayElemAt: ["$unreadStat.cnt", 0] }, 0]
+                    }
+                }
+            },
+            {
                 $project: {
                     spaceId: 1,
                     role: 1,
@@ -175,6 +203,7 @@ const spacesService = {
                     user2: 1,
                     memberCount: 1,
                     owner: 1,
+                    unreadCount: 1,
                     "lastMessage.text": 1,
                     "lastMessage.createdAt": 1,
                     "lastMessage.editedAt": 1
@@ -196,6 +225,7 @@ const spacesService = {
                     isBaned: space.isBaned,
                     lastMessage: space.lastMessage || undefined,
                     memberCount: space.memberCount,
+                    unreadCount: space.unreadCount,
                     chat: {
                         friendId: space.space.user1_id.toString() === String(userId) ? space.space.user2_id.toString() : space.space.user1_id.toString()
                     }
@@ -213,6 +243,7 @@ const spacesService = {
                     isBaned: space.isBaned,
                     lastMessage: space.lastMessage || undefined,
                     memberCount: space.memberCount,
+                    unreadCount: space.unreadCount,
                     group: {
                         owner: space.owner ? {
                             id: String(space.owner._id),

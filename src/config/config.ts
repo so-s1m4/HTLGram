@@ -10,7 +10,8 @@ interface Config {
     MEDIA_SERVER: string,
     SEED_EMOJIS: boolean,
     PRIVATE_KEY_PATH: string,
-    PRIVATE_KEY_BASE64: string
+    PRIVATE_KEY_BASE64: string,
+    DOMEN: string
 }
 
 export const config: Config = {
@@ -22,6 +23,6 @@ export const config: Config = {
     MEDIA_SERVER: process.env.MEDIA_SERVER || "http://localhost:8001",
     SEED_EMOJIS: process.env.SEED_EMOJIS === 'true' || false,
     PRIVATE_KEY_PATH: process.env.PRIVATE_KEY_PATH || 'jwtRS256.key',
-    PRIVATE_KEY_BASE64: Buffer.from(process.env.PRIVATE_KEY_BASE64 || '', 'base64').toString('utf8')
-    
+    PRIVATE_KEY_BASE64: Buffer.from(process.env.PRIVATE_KEY_BASE64 || '', 'base64').toString('utf8'),
+    DOMEN: process.env.DOMEN || "*"
 }

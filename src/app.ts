@@ -3,6 +3,7 @@ import cors from 'cors'
 import rateLimit from 'express-rate-limit'
 import path from 'path'
 import fs from 'fs'
+import { config } from './config/config'
 
 const app = express()
 
@@ -22,7 +23,9 @@ if (!fs.existsSync(publicDir)) {
 
 app.use('/public', express.static(publicDir))
 app.use(limiter)
-app.use(cors())
+app.use(cors({
+  origin: config.DOMEN
+}))
 app.use(express.json())
 
 

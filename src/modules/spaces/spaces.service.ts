@@ -416,8 +416,7 @@ const spacesService = {
             userId
         })
         if (member.isBaned) throw new ErrorWithStatus(403, "You are banned from this space")
-        
-        member.lastReadSeq = communication.seq
+        member.lastReadSeq = communication.seq < member.lastReadSeq ? member.lastReadSeq : communication.seq
         await member.save()
         return {
             lastReadSeq: member.lastReadSeq,

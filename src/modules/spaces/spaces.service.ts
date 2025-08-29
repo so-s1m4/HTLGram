@@ -11,6 +11,7 @@ import { isUserOnline } from "../../socket/socket.utils"
 import deleteFile from "../../common/utils/utils.deleteFile"
 
 export type LastMessage = {
+    seq: number,
     text: string,
     createdAt: Date, 
     editedAt: Date
@@ -39,6 +40,7 @@ export type SpacePublicResponse = {
     memberCount?: number,
     media?: MediaResponse[],
     unreadCount?: number,
+    lastReadMessageSeq?: number,
 
     chat?: {
         friendId: string
@@ -204,6 +206,8 @@ const spacesService = {
                     memberCount: 1,
                     owner: 1,
                     unreadCount: 1,
+                    lastReadSeq: 1,
+                    "lastMessage.seq": 1,
                     "lastMessage.text": 1,
                     "lastMessage.createdAt": 1,
                     "lastMessage.editedAt": 1
@@ -226,6 +230,7 @@ const spacesService = {
                     lastMessage: space.lastMessage || undefined,
                     memberCount: space.memberCount,
                     unreadCount: space.unreadCount,
+                    lastReadMessageSeq: space.lastReadSeq,
                     chat: {
                         friendId: space.space.user1_id.toString() === String(userId) ? space.space.user2_id.toString() : space.space.user1_id.toString()
                     }
@@ -244,6 +249,7 @@ const spacesService = {
                     lastMessage: space.lastMessage || undefined,
                     memberCount: space.memberCount,
                     unreadCount: space.unreadCount,
+                    lastReadMessageSeq: space.lastReadSeq,
                     group: {
                         owner: space.owner ? {
                             id: String(space.owner._id),
@@ -333,7 +339,7 @@ const spacesService = {
                 spaceId: chat._id,
                 isConfirmed: true,
                 text: { $regex: /^.{2,}/ }
-            }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date}>("text createdAt editedAt -_id").lean()
+            }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date, seq: number}>("text createdAt editedAt seq -_id").lean()
             const memberCount = await SpaceMemberModel.countDocuments({spaceId: chat._id})
             return {
                 id: chat._id.toString(),
@@ -359,7 +365,7 @@ const spacesService = {
                 spaceId: group._id,
                 isConfirmed: true,
                 text: { $regex: /^.{2,}/ }
-            }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date}>("text createdAt editedAt -_id").lean()
+            }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date, seq: number}>("text createdAt editedAt seq -_id").lean()
             // const memberCount = await SpaceMemberModel.countDocuments({spaceId: group._id})
             const members = await SpaceMemberModel.find({spaceId}).populate<{userId: UserI}>("userId", "username _id img").exec()
             const owner = await UserModel.findOneOrError({_id: group.owner})

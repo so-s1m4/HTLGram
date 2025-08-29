@@ -11,6 +11,7 @@ import { isUserOnline } from "../../socket/socket.utils"
 import deleteFile from "../../common/utils/utils.deleteFile"
 
 export type LastMessage = {
+    id: string,
     seq: number,
     text: string,
     createdAt: Date, 
@@ -136,8 +137,7 @@ const spacesService = {
                             $expr: {
                                 $and: [
                                 { $eq: ["$spaceId", "$$sid"] },
-                                { $eq: ["$isConfirmed", true] },
-                                { $regexMatch: { input: "$text", regex: /^.{2,}/ } }
+                                { $eq: ["$isConfirmed", true] }
                                 ]
                             }
                         }
@@ -207,6 +207,7 @@ const spacesService = {
                     owner: 1,
                     unreadCount: 1,
                     lastReadSeq: 1,
+                    "lastMessage.id": "$lastMessage._id",
                     "lastMessage.seq": 1,
                     "lastMessage.text": 1,
                     "lastMessage.createdAt": 1,
@@ -339,7 +340,7 @@ const spacesService = {
                 spaceId: chat._id,
                 isConfirmed: true,
                 text: { $regex: /^.{2,}/ }
-            }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date, seq: number}>("text createdAt editedAt seq -_id").lean()
+            }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date, seq: number, id: string}>("text createdAt editedAt seq id -_id").lean()
             const memberCount = await SpaceMemberModel.countDocuments({spaceId: chat._id})
             return {
                 id: chat._id.toString(),
@@ -365,7 +366,7 @@ const spacesService = {
                 spaceId: group._id,
                 isConfirmed: true,
                 text: { $regex: /^.{2,}/ }
-            }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date, seq: number}>("text createdAt editedAt seq -_id").lean()
+            }).sort({createdAt: -1}).select<{text: string, createdAt: Date, editedAt: Date, seq: number, id: string}>("text createdAt editedAt seq id -_id").lean()
             // const memberCount = await SpaceMemberModel.countDocuments({spaceId: group._id})
             const members = await SpaceMemberModel.find({spaceId}).populate<{userId: UserI}>("userId", "username _id img").exec()
             const owner = await UserModel.findOneOrError({_id: group.owner})

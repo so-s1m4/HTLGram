@@ -27,6 +27,7 @@ export type UserPublicR = {
 
 export type UserMeR = UserPublicR & {
   storage: number;
+  currency: number;
 };
 
 export type FriendPublicR = {
@@ -61,7 +62,7 @@ export function toUserMe(
   user: HydratedDocument<UserI> | (UserI & WithId)
 ): UserMeR {
   const base = toUserPublic(user);
-  return { ...base, storage: user.storage };
+  return { ...base, storage: user.storage, currency: user.currency };
 }
 
 

@@ -10,6 +10,7 @@ import { friendsHandler } from '../modules/friends/friends.socket';
 import { UserModel } from '../modules/users/users.model';
 import { emitToAllFriendsIfOnline } from './socket.utils';
 import { emojisHandler } from '../modules/emojis/emojis.socket';
+import { giftsHandler } from '../modules/gifts/gifts.socket';
 
 export const userSockets = new Map<string, Set<string>>();
 
@@ -82,7 +83,8 @@ function initSocket(httpServer: HttpServer) {
         communicationHandler(io, socket)
         friendsHandler(io, socket)
         emojisHandler(io, socket)
-        
+        giftsHandler(io, socket)
+
         await connectToRooms(socket)
         socket.on("disconnect", async () => {
             await handleDisconnection(socket.data.user.userId.toString(), socket.id, io)

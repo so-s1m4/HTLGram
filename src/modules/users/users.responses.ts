@@ -27,6 +27,7 @@ export type UserPublicR = {
 export type UserMeR = UserPublicR & {
 	storage: number
 	currency: number
+  role: 'user' | 'admin'
 }
 
 export type FriendPublicR = {
@@ -65,7 +66,7 @@ export function toUserMe(
 		| ((UserI & WithId) & { gifts?: any[] })
 ): UserMeR {
 	const base = toUserPublic(user)
-	return { ...base, storage: user.storage, currency: user.currency }
+	return { ...base, storage: user.storage, currency: user.currency, role: user.role }
 }
 
 export function toFriendPublic(

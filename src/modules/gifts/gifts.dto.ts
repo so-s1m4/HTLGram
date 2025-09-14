@@ -1,37 +1,40 @@
-import Joi from "joi"
+import Joi, { any } from 'joi'
 
 export type giftGetListDto = {
-    limit: number,
-    offset: number
+	limit: number
+	offset: number
 }
 export type giftSendDto = {
-	uid: string,
-    userId: string
+	uid: string
+	userId: string
+	text: string
+	anonymous?: boolean
 }
 export type giftSellDto = {
 	id: string
 }
 export type giftCreateDto = {
-	name: string,
-    url: string,
-    value: number,
-    amount: number,
+	name: string
+	url: string
+	value: number
+	amount: number
 }
 export type giftDeleteDto = {
-    uid: string
+	uid: string
 }
 
-
 export const giftGetListSchema = Joi.object<giftGetListDto>({
-    limit: Joi.number().integer().min(1).default(8),
-    offset: Joi.number().integer().min(0).default(0)
+	limit: Joi.number().integer().min(1).default(8),
+	offset: Joi.number().integer().min(0).default(0),
 })
 export const giftSendSchema = Joi.object<giftSendDto>({
-	uid: Joi.number().integer().min(1).default(8),
-	userId: Joi.number().integer().min(0).default(0),
+	uid: Joi.string().required(),
+	userId: Joi.string().required(),
+	text: Joi.string().min(0).max(500).optional(),
+	anonymous: Joi.boolean().optional(),
 })
 export const giftSellSchema = Joi.object<giftSellDto>({
-	id: Joi.number().integer().required()
+	id: Joi.string().required(),
 })
 export const giftCreateSchema = Joi.object<giftCreateDto>({
 	name: Joi.string().min(3).required(),

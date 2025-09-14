@@ -1,9 +1,9 @@
 import { HydratedDocument, MergeType, PopulatedDoc, Types } from 'mongoose'
-import { giftGetListDto } from './gifts.dto'
+import { giftGetListDto, giftSendDto } from './gifts.dto'
 import { GiftUserModel, GiftModel } from './gifts.model'
 import { GiftUserI, GiftI } from './gifts.types'
 import { CommunicationI } from '../communications/communication.types'
-import { UserI } from '../users/users.model'
+import { UserI, UserModel } from '../users/users.model'
 import { CommunicationModel } from '../communications/communication.model'
 import { SpaceMemberModel, SpaceModel } from '../spaces/spaces.model'
 import { SpaceTypesEnum } from '../spaces/spaces.types'
@@ -24,7 +24,7 @@ export type GiftUserResponse = {
 	updatedAt: Date
 }
 
-const emojisService = {
+const giftsService = {
 	async getList(data: giftGetListDto): Promise<GiftResponse[]> {
 		const gifts = await GiftModel.find({})
 			.skip(data.offset)
@@ -37,6 +37,62 @@ const emojisService = {
 			value: gift.value,
 			amount: gift.amount,
 		}))
+	},
+
+	async getOfUser(userId: string): Promise<GiftUserResponse[]> {
+		const giftUsers = await GiftUserModel.find({ userId })
+			.sort({ createdAt: -1 })
+			.populate<{ giftId: HydratedDocument<GiftI>; userId: HydratedDocument<UserI> }>('giftId userId')
+			.exec()
+
+		return giftUsers.map(giftUser => ({
+			gift: {
+				uid: String(giftUser.giftId._id),
+				name: giftUser.giftId.name,
+				url: giftUser.giftId.url,
+				value: giftUser.giftId.value,
+				amount: giftUser.giftId.amount,
+			},
+			user: {
+				id: String(giftUser.userId._id),
+				username: giftUser.userId.username,
+				img: giftUser.userId.img,
+			},
+			createdAt: giftUser.createdAt,
+			updatedAt: giftUser.updatedAt,
+		}))
+	},
+	async send(data: giftSendDto, userId: Types.ObjectId) {
+		const gift = await GiftModel.findById(data.uid)
+		if (!gift) throw new Error('Gift not found')
+		if (!(gift.amount > 0)) throw new Error('Gift was sold out')
+
+		const user = await UserModel.findById(userId)
+		if (!user) throw new Error('User not found')
+
+		const receiver = await UserModel.findById(data.userId)
+		if (!receiver) throw new Error('Receiver not found')
+
+		if (user.currency < gift.value) throw new Error('Insufficient funds')
+
+		// Send the gift
+		// #TODO Make it annonymous
+
+		const giftUser = new GiftUserModel({
+			giftId: gift._id,
+			userId: receiver._id,
+			text: data.text,
+			isAnonym: data.anonymous,
+		})
+		await giftUser.save()
+
+		gift.amount -= 1
+		await gift.save()
+
+		user.currency -= gift.value
+		await user.save()
+
+		return giftUser
 	},
 
 	// async toggle(
@@ -139,4 +195,4 @@ const emojisService = {
 	// },
 }
 
-export default emojisService
+export default giftsService

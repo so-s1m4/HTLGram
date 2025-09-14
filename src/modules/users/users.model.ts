@@ -27,6 +27,7 @@ export interface UserI {
 	createdAt: Date
 	updatedAt: Date
 	currency: number
+	role: 'user' | 'admin'
 }
 
 export interface UserMethods extends Model<UserI> {
@@ -77,6 +78,12 @@ const userSchema = new Schema<UserI, UserMethods>(
 		wasOnline: {
 			type: Date,
 			default: null,
+		},
+		role: {
+			type: String,
+			enum: ['user', 'admin'],
+			default: 'user',
+			required: true,
 		},
 	},
 	{

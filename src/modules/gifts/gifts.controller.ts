@@ -1,6 +1,6 @@
 import { validationWrapper } from '../../common/utils/utils.wrappers'
 import { Types } from 'mongoose'
-import { giftGetListDto, giftGetListSchema } from './gifts.dto'
+import { giftGetListDto, giftGetListSchema, giftSendSchema, giftSendDto } from './gifts.dto'
 import { Server } from 'socket.io'
 import giftsService from './gifts.service'
 
@@ -10,10 +10,16 @@ const giftsController = {
 		const gifts = await giftsService.getList(dto)
 		return gifts
 	},
-	async send(data: any, userId: Types.ObjectId, io: Server) {
-		const dto = validationWrapper<giftGetListDto>(giftGetListSchema, data)
-		const gifts = await giftsService.getList(dto)
+	async getOfUser(data: any, userId: Types.ObjectId, io: Server) {
+		const gifts = await giftsService.getOfUser(data.userId)
 		return gifts
+	},
+	async send(data: any, userId: Types.ObjectId, io: Server) {
+		const dto = validationWrapper<giftSendDto>(giftSendSchema, data)
+		const response = await giftsService.send(dto, userId)
+		io.to(`user:${dto.userId}`).emit('gifts:receive', response)
+
+		return response
 	},
 	async sell(data: any, userId: Types.ObjectId, io: Server) {
 		const dto = validationWrapper<giftGetListDto>(giftGetListSchema, data)

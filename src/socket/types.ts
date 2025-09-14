@@ -18,6 +18,7 @@ export interface ServerToClientEvents {
   "friends:requestCanceled": (data: any) => void,
   "friends:requestAccepted": (data: any) => void,
   "friends:requestDeleted": (data: any) => void,
+	"gifts:receive": (data: any) => void,
 }
 
 export type SocketAck = (status: boolean, error?: string, data?: any) => void;

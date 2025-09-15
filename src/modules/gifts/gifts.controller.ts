@@ -3,7 +3,7 @@ import { Types } from 'mongoose'
 import { giftGetListDto, giftGetListSchema, giftSendSchema, giftSendDto } from './gifts.dto'
 import { Server } from 'socket.io'
 import giftsService from './gifts.service'
-import { emitToUserIfOnline } from '../../wrappers'
+import { emitToUserIfOnline } from '../../socket/socket.utils'
 
 const giftsController = {
 	async getList(data: any, userId: Types.ObjectId, io: Server) {

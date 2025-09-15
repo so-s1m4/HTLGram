@@ -3,6 +3,7 @@ import { Types } from 'mongoose'
 import { giftGetListDto, giftGetListSchema, giftSendSchema, giftSendDto } from './gifts.dto'
 import { Server } from 'socket.io'
 import giftsService from './gifts.service'
+import { emitToUserIfOnline } from 'socket/socket.utils'
 
 const giftsController = {
 	async getList(data: any, userId: Types.ObjectId, io: Server) {
@@ -17,7 +18,7 @@ const giftsController = {
 	async send(data: any, userId: Types.ObjectId, io: Server) {
 		const dto = validationWrapper<giftSendDto>(giftSendSchema, data)
 		const response = await giftsService.send(dto, userId)
-		io.to(`user:${dto.userId}`).emit('gifts:receive', response)
+		emitToUserIfOnline(dto.userId, 'gifts:receive', response, io)
 
 		return response
 	},

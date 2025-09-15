@@ -104,7 +104,21 @@ const giftsService = {
 		user.currency -= gift.value
 		await user.save()
 
-		return giftUser
+		const populated = await giftUser.populate<{
+			giftId: HydratedDocument<GiftI>
+			userId: HydratedDocument<UserI>
+			senderId: HydratedDocument<UserI>
+		}>('giftId userId senderId')
+
+		return {
+			tid: String(populated._id),
+			gift: populated.giftId,
+			user: populated.userId,
+			sender: populated.senderId,
+			createdAt: populated.createdAt,
+			updatedAt: populated.updatedAt,
+			anonym: populated.isAnonym,
+		}
 	},
 	async sell(data: giftSellDto, userId: Types.ObjectId) {
 		const transaction = await GiftUserModel.findById(data.transactionId)
@@ -125,7 +139,7 @@ const giftsService = {
 
 		await gift.save()
 		await user.save()
-	}
+	},
 
 	// async toggle(
 	// 	data: emojiToggleDto,

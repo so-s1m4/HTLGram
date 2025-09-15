@@ -25,6 +25,8 @@ const giftsController = {
 	async sell(data: any, userId: Types.ObjectId, io: Server) {
 		const dto = validationWrapper<giftSellDto>(giftSellSchema, data)
 		const response = await giftsService.sell(dto, userId)
+		emitToUserIfOnline(String(userId), 'gifts:sold', dto.transactionId, io)
+
 		return response
 	},
 	async create(data: any, userId: Types.ObjectId, io: Server) {

@@ -1,27 +1,28 @@
-import { Types } from "mongoose";
+import { Types } from 'mongoose'
 
 export interface ServerToClientEvents {
-  "communication:newMessage": (data: any) => void,
-  "communication:editMessage": (data: any) => void,
-  "space:addedToNew": (data: any) => void,
-  "space:readMessages": (data: any) => void,
-  "space:deleted": (data: any) => void,
-  "space:addMembers": (data: any) => void,
-  "space:removeMembers": (data: any) => void,
-  "space:removedFromSpace": (data: any) => void,
-  "space:addedAdmin": (data: any) => void,
-  "space:removedAdmin": (data: any) => void,
-  "space:memberLeaved": (data: any) => void,
-  "communication:deleteMedia": (data: any) => void,
-  "communication:deleteMessage": (data: any) => void,
-  "friends:newRequest": (data: any) => void,
-  "friends:requestCanceled": (data: any) => void,
-  "friends:requestAccepted": (data: any) => void,
-  "friends:requestDeleted": (data: any) => void,
-	"gifts:receive": (data: any) => void,
+	'communication:newMessage': (data: any) => void
+	'communication:editMessage': (data: any) => void
+	'space:addedToNew': (data: any) => void
+	'space:readMessages': (data: any) => void
+	'space:deleted': (data: any) => void
+	'space:addMembers': (data: any) => void
+	'space:removeMembers': (data: any) => void
+	'space:removedFromSpace': (data: any) => void
+	'space:addedAdmin': (data: any) => void
+	'space:removedAdmin': (data: any) => void
+	'space:memberLeaved': (data: any) => void
+	'communication:deleteMedia': (data: any) => void
+	'communication:deleteMessage': (data: any) => void
+	'friends:newRequest': (data: any) => void
+	'friends:requestCanceled': (data: any) => void
+	'friends:requestAccepted': (data: any) => void
+	'friends:requestDeleted': (data: any) => void
+	'gifts:receive': (data: any) => void
+	'gifts:sold': (data: any) => void
 }
 
-export type SocketAck = (status: boolean, error?: string, data?: any) => void;
+export type SocketAck = (status: boolean, error?: string, data?: any) => void
 
 export interface ClientToServerEvents {
 	'spaces:getList': (callback?: SocketAck) => any
@@ -60,15 +61,13 @@ export interface ClientToServerEvents {
 	'gifts:delete': (data: any, callback?: SocketAck) => any
 }
 
-export interface InterServerEvents {
-
-}
+export interface InterServerEvents {}
 
 export interface SocketData {
-  user: {userId: Types.ObjectId}
+	user: { userId: Types.ObjectId }
 }
 
 export interface spaceForaddSockettoNewSpaceIfOnline {
-  type: string;
-  id: string
+	type: string
+	id: string
 }

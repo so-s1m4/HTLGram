@@ -11,7 +11,7 @@ export type giftSendDto = {
 	anonymous?: boolean
 }
 export type giftSellDto = {
-	id: string
+	transactionId: string
 }
 export type giftCreateDto = {
 	name: string
@@ -34,7 +34,7 @@ export const giftSendSchema = Joi.object<giftSendDto>({
 	anonymous: Joi.boolean().optional(),
 })
 export const giftSellSchema = Joi.object<giftSellDto>({
-	id: Joi.string().required(),
+	transactionId: Joi.string().required(),
 })
 export const giftCreateSchema = Joi.object<giftCreateDto>({
 	name: Joi.string().min(3).required(),

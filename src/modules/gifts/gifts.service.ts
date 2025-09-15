@@ -1,5 +1,5 @@
 import { HydratedDocument, MergeType, PopulatedDoc, Types } from 'mongoose'
-import { giftGetListDto, giftSendDto } from './gifts.dto'
+import { giftGetListDto, giftSellDto, giftSendDto } from './gifts.dto'
 import { GiftUserModel, GiftModel } from './gifts.model'
 import { GiftUserI, GiftI } from './gifts.types'
 import { CommunicationI } from '../communications/communication.types'
@@ -106,6 +106,26 @@ const giftsService = {
 
 		return giftUser
 	},
+	async sell(data: giftSellDto, userId: Types.ObjectId) {
+		const transaction = await GiftUserModel.findById(data.transactionId)
+		if (!transaction) throw new Error('Transaction not found')
+
+		const user = await UserModel.findById(userId)
+		const gift = await GiftModel.findById(transaction.giftId)
+
+		if (String(transaction.userId) !== String(userId))
+			throw new Error('You are not the owner of this gift')
+		if (!gift) throw new Error('Gift not found')
+		if (!user) throw new Error('User not found')
+
+		// Return the gift
+		await transaction.deleteOne()
+		gift.amount += 1
+		user.currency += gift.value * 0.75
+
+		await gift.save()
+		await user.save()
+	}
 
 	// async toggle(
 	// 	data: emojiToggleDto,

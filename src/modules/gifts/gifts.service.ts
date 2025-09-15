@@ -51,6 +51,7 @@ const giftsService = {
 			.exec()
 
 		return giftUsers.map(giftUser => ({
+			tid: String(giftUser._id),
 			gift: {
 				uid: String(giftUser.giftId._id),
 				name: giftUser.giftId.name,

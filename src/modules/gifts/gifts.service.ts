@@ -20,6 +20,7 @@ export type GiftResponse = {
 export type GiftUserResponse = {
 	gift: GiftResponse
 	user: UserShortPublicResponse
+	sender: UserShortPublicResponse
 	createdAt: Date
 	updatedAt: Date
 }
@@ -42,7 +43,11 @@ const giftsService = {
 	async getOfUser(userId: string): Promise<GiftUserResponse[]> {
 		const giftUsers = await GiftUserModel.find({ userId })
 			.sort({ createdAt: -1 })
-			.populate<{ giftId: HydratedDocument<GiftI>; userId: HydratedDocument<UserI> }>('giftId userId')
+			.populate<{
+				giftId: HydratedDocument<GiftI>
+				userId: HydratedDocument<UserI>
+				senderId: HydratedDocument<UserI>
+			}>('giftId userId senderId')
 			.exec()
 
 		return giftUsers.map(giftUser => ({
@@ -57,6 +62,11 @@ const giftsService = {
 				id: String(giftUser.userId._id),
 				username: giftUser.userId.username,
 				img: giftUser.userId.img,
+			},
+			sender: {
+				id: String(giftUser.senderId._id),
+				username: giftUser.senderId.username,
+				img: giftUser.senderId.img,
 			},
 			createdAt: giftUser.createdAt,
 			updatedAt: giftUser.updatedAt,
@@ -81,6 +91,7 @@ const giftsService = {
 		const giftUser = new GiftUserModel({
 			giftId: gift._id,
 			userId: receiver._id,
+			senderId: user._id,
 			text: data.text,
 			isAnonym: data.anonymous,
 		})

@@ -26,14 +26,19 @@ const GiftUserSchema = new Schema<GiftUserI>(
 			ref: 'User',
 			required: true,
 		},
+		senderId: {
+			type: Types.ObjectId,
+			ref: 'User',
+			required: true,
+		},
 		isAnonym: {
 			type: Boolean,
-			default: false
+			default: false,
 		},
 		text: {
 			type: String,
-			default: ""
-		}
+			default: '',
+		},
 	},
 	{ timestamps: true }
 )

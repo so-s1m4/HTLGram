@@ -3,7 +3,7 @@ import { CreateFriendRequestDto, CreateFriendRequestSchema, DeleteFriendRequestD
 import friendsService from "./friends.service";
 import { Socket, Server } from "socket.io";
 import { Types } from "mongoose";
-import {emitToUserIfOnline} from "../../socket/socket.utils"
+import { emitToUserIfOnline } from "../../socket/socket.utils"
 import { toFriendRequestPublic, toFriendRequestPublicArray } from "./friends.responses";
 import e from "express";
 

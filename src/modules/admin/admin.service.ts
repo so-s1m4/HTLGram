@@ -9,6 +9,10 @@ const adminService = {
 			const users = await UserModel.find(filter).select('-password')
 			return users
 		},
+		createUser: async (data: any) => {
+			const user = await UserModel.create(data)
+			return user
+		},
 		getUserById: async (userId: string) => {
 			const user = await UserModel.findById(userId).select('-password')
 			return user
@@ -27,6 +31,14 @@ const adminService = {
 		},
 		getUserGiftsById: async (userId: string, giftId: string) => {
 			const gift = await GiftUserModel.findOne({ userId: userId, _id: giftId })
+			return gift
+		},
+		updateUserGiftById: async (userId: string, giftId: string, data: Partial<typeof GiftUserModel>) => {
+			const gift = await GiftUserModel.findOneAndUpdate(
+				{ userId: userId, _id: giftId },
+				data,
+				{ new: true }
+			)
 			return gift
 		},
 		deleteUserGiftById: async (userId: string, giftId: string) => {

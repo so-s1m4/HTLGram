@@ -12,7 +12,7 @@ router.get('/users', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.
 router.post('/users', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.createUser))
 
 router.get('/users/:userId', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.getUserById))
-router.patch('/users/:userId', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.updateUserById))
+router.patch('/users/:userId', JWTMiddleware, ISAdmin, upload.single('img'), ErrorWrapper(adminController.users.updateUserById))
 router.delete('/users/:userId', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.deleteUserById))
 
 router.get('/users/:userId/gifts', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.getUserGifts))

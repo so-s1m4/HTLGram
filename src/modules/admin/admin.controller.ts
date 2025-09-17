@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import usersService from '../users/users.service'
 import adminService from './admin.service'
+import { ObjectId } from 'mongoose'
 
 const adminController = {
 	users: {
@@ -17,10 +18,14 @@ const adminController = {
 			res.status(200).json({ data: user })
 		},
 		updateUserById: async (req: Request, res: Response, next: NextFunction) => {
+			const userId: any = req.params.userId
 			const user = await adminService.users.updateUserById(
-				req.params.userId,
+				userId,
 				req.body
 			)
+			if (req.file) {
+				await usersService.uploadMyPhoto(userId, req.file)
+			}
 			res.status(200).json({ data: user })
 		},
 		deleteUserById: async (req: Request, res: Response, next: NextFunction) => {

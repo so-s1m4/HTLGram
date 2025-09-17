@@ -6,7 +6,7 @@ import { CommunicationModel } from '../communications/communication.model'
 const adminService = {
 	users: {
 		getUsersList: async (filter = {}) => {
-			const users = await UserModel.find(filter).select('-password')
+			const users = await UserModel.find(filter).select('-password').select('-__v')
 			return users
 		},
 		createUser: async (data: any) => {

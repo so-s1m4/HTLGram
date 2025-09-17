@@ -2,6 +2,7 @@ import { GiftUserModel } from '../gifts/gifts.model'
 import { UserModel } from '../users/users.model'
 import { EmojiModel } from '../emojis/emojis.model'
 import { CommunicationModel } from '../communications/communication.model'
+import usersService from 'modules/users/users.service'
 
 const adminService = {
 	users: {
@@ -10,7 +11,8 @@ const adminService = {
 			return users
 		},
 		createUser: async (data: any) => {
-			const user = await UserModel.create(data)
+			await usersService.register({ ...data })
+			const user = await UserModel.findOne({ username: data.username })
 			return user
 		},
 		getUserById: async (userId: string) => {

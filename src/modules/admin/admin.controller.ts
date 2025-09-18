@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express'
 import usersService from '../users/users.service'
 import adminService from './admin.service'
 import { ObjectId } from 'mongoose'
+import { config } from '../../config/config'
+import bcrypt from 'bcryptjs'
 
 const adminController = {
 	users: {
@@ -19,11 +21,19 @@ const adminController = {
 		},
 		updateUserById: async (req: Request, res: Response, next: NextFunction) => {
 			const userId: any = req.params.userId
+			delete req.body.img
+			delete req.body._id
+			delete req.body.__v
+			delete req.body.updatedAt
+			delete req.body.createdAt
+			delete req.body.friendsCount
+			if (req.body.password) req.body.password = await bcrypt.hash(req.body.password, config.PASSWORD_SALT);
+
+
 			const user = await adminService.users.updateUserById(
 				userId,
 				req.body
 			)
-			console.log('file', req.file)
 			if (req.file) {
 				await usersService.uploadMyPhoto(userId, req.file)
 			}

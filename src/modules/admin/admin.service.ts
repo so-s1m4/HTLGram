@@ -2,7 +2,7 @@ import { GiftUserModel } from '../gifts/gifts.model'
 import { UserModel } from '../users/users.model'
 import { EmojiModel } from '../emojis/emojis.model'
 import { CommunicationModel } from '../communications/communication.model'
-import usersService from 'modules/users/users.service'
+import usersService from '../users/users.service'
 
 const adminService = {
 	users: {

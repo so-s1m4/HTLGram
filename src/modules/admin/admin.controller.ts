@@ -23,6 +23,7 @@ const adminController = {
 				userId,
 				req.body
 			)
+			console.log('file', req.file)
 			if (req.file) {
 				await usersService.uploadMyPhoto(userId, req.file)
 			}

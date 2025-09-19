@@ -4,6 +4,7 @@ import adminService from './admin.service'
 import { ObjectId } from 'mongoose'
 import { config } from '../../config/config'
 import bcrypt from 'bcryptjs'
+import { create } from 'domain'
 
 const adminController = {
 	users: {
@@ -42,6 +43,13 @@ const adminController = {
 		deleteUserById: async (req: Request, res: Response, next: NextFunction) => {
 			const user = await adminService.users.deleteUserById(req.params.userId)
 			res.status(200).json({ data: user })
+		},
+		createUserGift: async (req: Request, res: Response, next: NextFunction) => {
+			const user = await adminService.users.createUserGift(
+				req.params.userId,
+				req.body
+			)
+			res.status(201).json({ data: user })
 		},
 		getUserGifts: async (req: Request, res: Response, next: NextFunction) => {
 			const user = await adminService.users.getUserGifts(req.params.userId)

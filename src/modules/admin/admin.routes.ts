@@ -16,6 +16,7 @@ router.patch('/users/:userId', JWTMiddleware, ISAdmin, upload.single('img'), Err
 router.delete('/users/:userId', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.deleteUserById))
 
 router.get('/users/:userId/gifts', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.getUserGifts))
+router.post('/users/:userId/gifts', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.createUserGift))
 router.get('/users/:userId/gifts/:giftId', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.getUserGiftById))
 router.patch('/users/:userId/gifts/:giftId', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.updateUserGiftById))
 router.delete('/users/:userId/gifts/:giftId', JWTMiddleware, ISAdmin, ErrorWrapper(adminController.users.deleteUserGiftById))

@@ -1,8 +1,9 @@
-import { GiftUserModel } from '../gifts/gifts.model'
+import { GiftModel, GiftUserModel } from '../gifts/gifts.model'
 import { UserModel } from '../users/users.model'
 import { EmojiModel } from '../emojis/emojis.model'
 import { CommunicationModel } from '../communications/communication.model'
 import usersService from '../users/users.service'
+import { create } from 'domain'
 
 const adminService = {
 	users: {
@@ -30,6 +31,10 @@ const adminService = {
 		getUserGifts: async (userId: string) => {
 			const gifts = await GiftUserModel.find({ userId: userId })
 			return gifts
+		},
+		createUserGift: async (userId: string, data: Partial<typeof GiftUserModel>) => {
+			const gift = await GiftUserModel.create({ userId, ...data })
+			return gift
 		},
 		getUserGiftsById: async (userId: string, giftId: string) => {
 			const gift = await GiftUserModel.findOne({ userId: userId, _id: giftId })
@@ -75,28 +80,28 @@ const adminService = {
 	},
 	gifts: {
 		getGifts: async (filter = {}) => {
-			const gifts = await GiftUserModel.find(filter)
+			const gifts = await GiftModel.find(filter)
 			return gifts
 		},
 		createGift: async (data: any) => {
-			const gift = await GiftUserModel.create(data)
+			const gift = await GiftModel.create(data)
 			return gift
 		},
 		getGiftById: async (giftId: string) => {
-			const gift = await GiftUserModel.findById(giftId)
+			const gift = await GiftModel.findById(giftId)
 			return gift
 		},
 		updateGiftById: async (
 			giftId: string,
-			data: Partial<typeof GiftUserModel>
+			data: Partial<typeof GiftModel>
 		) => {
-			const gift = await GiftUserModel.findByIdAndUpdate(giftId, data, {
+			const gift = await GiftModel.findByIdAndUpdate(giftId, data, {
 				new: true,
 			})
 			return gift
 		},
 		deleteGiftById: async (giftId: string) => {
-			const gift = await GiftUserModel.findByIdAndDelete(giftId)
+			const gift = await GiftModel.findByIdAndDelete(giftId)
 			return gift
 		},
 	},

@@ -33,10 +33,12 @@ app.use(express.json())
 // ROUTES
 import usersRouter from './modules/users/users.routes'
 import serviceRouter from './modules/service/service.routes'
+import timeItemRouter from './modules/time-item/time-item.routes'
 // import adminRouter from './modules/admin/admin.routes'
 
 app.use('/api/users', usersRouter)
 app.use('/api/services', serviceRouter)
+app.use('/api/time_items', timeItemRouter)
 // app.use('/api/admin', adminRouter)
 
 

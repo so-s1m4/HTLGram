@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "nodemon src/server.ts",
     "docker:build": "docker build -t hltgram .",
     "compose:up": "docker-compose up -d",
     "compose:down": "docker-compose down",

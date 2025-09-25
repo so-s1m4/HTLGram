@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { ErrorWithStatus } from './errorHandlerMiddleware'
 import usersService from '../../modules/users/users.service'
 
-const JWTMiddleware = (req: Request, res: Response, next: NextFunction) => {
+const isAdminMiddleware = (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const data = res.locals.user
 		if (!data || typeof data === 'string') {
@@ -26,4 +26,4 @@ const JWTMiddleware = (req: Request, res: Response, next: NextFunction) => {
 	}
 }
 
-export default JWTMiddleware
+export default isAdminMiddleware

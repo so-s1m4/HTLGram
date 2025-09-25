@@ -1,102 +1,80 @@
+import mongoose, {
+	Model,
+	Schema,
+	HydratedDocument,
+	FilterQuery,
+} from 'mongoose'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware'
-import { Model, Schema, model, Types, HydratedDocument } from 'mongoose'
 
-export interface ImageInfoI {
-	path: string
-	size: number
-}
-
-export const imageInfoSchema = new Schema<ImageInfoI>(
-	{
-		path: { type: String, required: true },
-		size: { type: Number, required: true },
-	},
-	{ _id: false }
-)
+const options = { discriminatorKey: 'role', collection: 'users' }
 
 export interface UserI {
-	_id: Schema.Types.ObjectId
-	username: string
-	password: string
 	name: string
-	description?: string
-	img: ImageInfoI[]
-	friendsCount: number
-	storage: number
-	wasOnline: Date | null
-	createdAt: Date
-	updatedAt: Date
-	currency: number
-	role: 'user' | 'admin'
+	role: 'admin' | 'master' | 'client';
+	createdAt?: Date
+	updatedAt?: Date
 }
 
-export interface UserMethods extends Model<UserI> {
-	findOneOrError(filter: object): Promise<HydratedDocument<UserI>>
+export interface UserModel extends Model<UserI> {
+	findOneOrError(filter: FilterQuery<UserI>): Promise<HydratedDocument<UserI>>
 }
 
-const userSchema = new Schema<UserI, UserMethods>(
+const userSchema = new Schema<UserI, UserModel>(
 	{
-		username: {
-			type: String,
-			required: true,
-			unique: true,
-		},
-		password: {
-			type: String,
-			required: true,
-			select: false,
-		},
-		name: {
-			type: String,
-			required: true,
-		},
-		description: {
-			type: String,
-		},
-		img: {
-			type: [imageInfoSchema],
-			default: [],
-			validate: {
-				validator: arr => arr.length <= 10,
-				message: 'Cannot have more than 10 images',
-			},
-		},
-		friendsCount: {
-			type: Number,
-			default: 0,
-		},
-		storage: {
-			type: Number,
-			default: 0,
-			required: true,
-		},
-		currency: {
-			type: Number,
-			default: 0,
-			required: true,
-		},
-		wasOnline: {
-			type: Date,
-			default: null,
-		},
-		role: {
-			type: String,
-			enum: ['user', 'admin'],
-			default: 'user',
-			required: true,
-		},
+		name: { type: String, required: true },
+		role: { type: String, enum: ['admin', 'master', 'client'], required: true, immutable: true }
 	},
 	{
-		statics: {
-			async findOneOrError(filter: object) {
-				const user = await this.findOne(filter).exec()
-
-				if (!user) throw new ErrorWithStatus(404, 'User was not found')
-				return user
-			},
-		},
-		timestamps: true, // createdAt and updatedAt
+		...options,
+		timestamps: true,
 	}
 )
 
-export const UserModel = model<UserI, UserMethods>('User', userSchema)
+userSchema.statics.findOneOrError = async function (
+	this: UserModel,
+	filter: FilterQuery<UserI>
+) {
+	const user = await this.findOne(filter).exec()
+	if (!user) throw new ErrorWithStatus(404, 'User was not found')
+	return user
+}
+
+export const User = mongoose.model<UserI, UserModel>('User', userSchema)
+
+// ---------- Discriminators ----------
+
+export interface AdminI extends UserI {
+	username: string
+	password: string
+	role: 'admin'
+}
+
+const adminSchema = new Schema<AdminI>({
+	username: { type: String, required: true, unique: true },
+	password: { type: String, required: true },
+})
+export const Admin = User.discriminator<AdminI>('admin', adminSchema)
+
+export interface MasterI extends UserI {
+	username: string
+	password: string
+	role: 'master'
+}
+const masterSchema = new Schema<MasterI>({
+	username: { type: String, required: true, unique: true },
+	password: { type: String, required: true },
+})
+export const Master = User.discriminator<MasterI>('master', masterSchema)
+
+export interface ClientI extends UserI {
+	password?: string
+	phone?: string
+	email?: string
+	role: 'client'
+}
+const clientSchema = new Schema<ClientI>({
+	password: { type: String },
+	phone: { type: String, unique: true, sparse: true },
+	email: { type: String, unique: true, sparse: true },
+})
+export const Client = User.discriminator<ClientI>('client', clientSchema)

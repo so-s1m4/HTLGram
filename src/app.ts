@@ -32,12 +32,12 @@ app.use(express.json())
 
 // ROUTES
 import usersRouter from './modules/users/users.routes'
-import spacesRouter from './modules/spaces/spaces.routes'
-import adminRouter from './modules/admin/admin.routes'
+import serviceRouter from './modules/service/service.routes'
+// import adminRouter from './modules/admin/admin.routes'
 
 app.use('/api/users', usersRouter)
-app.use('/api/spaces', spacesRouter)
-app.use('/api/admin', adminRouter)
+app.use('/api/services', serviceRouter)
+// app.use('/api/admin', adminRouter)
 
 
 // Additional handlers

@@ -9,45 +9,51 @@ const app = express()
 
 // limiter
 const limiter = rateLimit({
-    windowMs: 60 * 1000,
-    max: 100,
-    message: "Too many requests from this IP, please try again after 1 minutes"
+	windowMs: 60 * 1000,
+	max: 100,
+	message: 'Too many requests from this IP, please try again after 1 minutes',
 })
 
 // Public dir
-export const publicDir = path.join(__dirname, '../public');
+export const publicDir = path.join(__dirname, '../public')
 if (!fs.existsSync(publicDir)) {
-  fs.mkdirSync(publicDir, { recursive: true });
-  console.log(`Created missing directory: ${publicDir}`);
+	fs.mkdirSync(publicDir, { recursive: true })
+	console.log(`Created missing directory: ${publicDir}`)
 }
 
 app.use('/public', express.static(publicDir))
 app.use(limiter)
-app.use(cors({
-  origin: config.DOMEN
-}))
+app.use(
+	cors({
+		origin: config.DOMEN,
+	})
+)
 app.use(express.json())
-
-
 
 // ROUTES
 import usersRouter from './modules/users/users.routes'
 import serviceRouter from './modules/service/service.routes'
 import timeItemRouter from './modules/time-item/time-item.routes'
+import JWTMiddleware from './common/middlewares/JWTMiddleware'
+import isAdminMiddleware from './common/middlewares/ISAdmin'
+import { ErrorWrapper } from './common/utils/utils.wrappers'
+import getDayInfo from './common/utils/getDayInfo'
+
+
 // import adminRouter from './modules/admin/admin.routes'
 
 app.use('/api/users', usersRouter)
 app.use('/api/services', serviceRouter)
 app.use('/api/time_items', timeItemRouter)
+app.get('/api/day_info', JWTMiddleware, isAdminMiddleware, ErrorWrapper(getDayInfo))
 // app.use('/api/admin', adminRouter)
-
 
 // Additional handlers
 import errorHandler from './common/middlewares/errorHandlerMiddleware'
 import notFound from './common/middlewares/notFoundMiddleware'
 
+
 app.use(notFound)
 app.use(errorHandler)
 
 export default app
-

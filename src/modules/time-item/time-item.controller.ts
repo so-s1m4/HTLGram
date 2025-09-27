@@ -16,9 +16,10 @@ const TimeItemController = {
   },
   async getAll(req: Request, res: Response, next: NextFunction) {
     const userId = res.locals.user.userId
+
     const dto = validationWrapper<GetTimeItemsDto>(
       GetTimeItemsSchema,
-      req.body || {}
+      req.query || {}
     )
     const timeItems = await timeItemService.getTimeItems(dto)
     res.status(200).json({ data: timeItems })

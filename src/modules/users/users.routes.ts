@@ -19,6 +19,7 @@ router.get('/me', JWTMiddleware, ErrorWrapper(usersController.getMyData))
 router.patch('/me',JWTMiddleware,ErrorWrapper(usersController.updateMyData))
 
 router.delete('/:id', JWTMiddleware, isAdminMiddleware, ErrorWrapper(usersController.deleteUser))
+router.patch('/:id/work_time/', JWTMiddleware, isAdminMiddleware, ErrorWrapper(usersController.updateWork))
 router.patch('/:id', JWTMiddleware, isAdminMiddleware, ErrorWrapper(usersController.updateUser))
 
 

@@ -9,9 +9,14 @@ import {
 	UpdateMyDataSchema,
 	UpdateUserDto,
 	UpdateUserSchema,
+	UpdateWorkDto,
+	UpdateWorkSchema,
 } from './users.dto'
 import { Request, Response, NextFunction } from 'express'
-import { validationWrapper } from '../../common/utils/utils.wrappers'
+import {
+	ErrorWrapper,
+	validationWrapper,
+} from '../../common/utils/utils.wrappers'
 import { ErrorWithStatus } from '../../common/middlewares/errorHandlerMiddleware'
 import usersService from './users.service'
 import { HydratedDocument, Types } from 'mongoose'
@@ -39,7 +44,6 @@ const withoutPassword = (user: any) => {
 	return obj
 }
 
-
 const usersController = {
 	async login(req: Request, res: Response, next: NextFunction) {
 		const dto = validationWrapper<LoginUserDto>(LoginUserSchema, req.body || {})
@@ -51,7 +55,7 @@ const usersController = {
 		const userId = res.locals.user.userId
 		const dto = validationWrapper<GetUsersListDto>(
 			GetUsersListSchema,
-			req.body || {}
+			req.query || {}
 		)
 		const users = await usersService.getUsersList(dto, userId)
 		res.status(200).json({ data: users.map(withoutPassword).map(toUserMe) })
@@ -102,6 +106,19 @@ const usersController = {
 		)
 		await usersService.updateUser(new Types.ObjectId(userId), dto)
 		res.status(200).json({ data: 'User was updated' })
+	},
+	async updateWork(req: Request, res: Response, next: NextFunction) {
+		const userId = req.params.id
+
+		const data = validationWrapper<UpdateWorkDto>(UpdateWorkSchema, req.body)
+
+		console.log(data)
+		if (!data.timeStart || !data.timeEnd || data.timeStart === data.timeEnd) {
+			await usersService.deleteWork(userId, data.date)
+		} else {
+			await usersService.updateWork(userId, data)
+		}
+		res.status(200).json({ data: 'User work time was updated' })
 	},
 }
 

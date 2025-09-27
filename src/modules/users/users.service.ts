@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken'
 import mongoose, { HydratedDocument, Types } from "mongoose"
 import deleteFile from "../../common/utils/utils.deleteFile"
 import { GetUsersListDto, LoginUserDto, RegisterUserDto, UpdateMyDataDto, UpdateUserDto } from "./users.dto"
+import { Work } from "../time-item/time-item.model"
 
 type UserDoc = HydratedDocument<UserI>;
 
@@ -92,6 +93,28 @@ const usersService = {
 	    if (data.name) user.name = data.name;
 			
 	    await user.save();
+	},
+	async updateWork(userId: string, data: {
+		date: string,
+		timeStart: number,
+		timeEnd: number,
+	}){
+		const workItem = await Work.findOne({userId: userId, date: data.date}).exec()
+		if(workItem){
+			workItem.timeStart = data.timeStart
+			workItem.timeEnd = data.timeEnd
+			await workItem.save()
+		}else{
+			return await Work.create({
+				userId: new mongoose.Types.ObjectId(userId),
+				date: data.date,
+				timeStart: data.timeStart,
+				timeEnd: data.timeEnd
+			})
+		}
+	},
+	async deleteWork(userId: string, date: string){
+		await Work.deleteOne({userId: userId, date: date}).exec()
 	}
 	
 

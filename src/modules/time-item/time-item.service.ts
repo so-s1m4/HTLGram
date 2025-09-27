@@ -63,6 +63,24 @@ const timeItemService = {
 		}
 	},
 	async getTimeItems(data: any) {
+		// dateFrom?: Date | undefined;
+    // dateTo?: Date | undefined;
+    // userId?: string | undefined;
+    // clientId?: string | undefined;
+    // serviceId?: string | undefined;
+    // type?: TimeItemType | undefined;
+
+		const [dataFrom, dataTo] = [data.dateFrom, data.dateTo].map((d: any) =>
+			d ? new Date(d) : null
+		)
+		if (dataFrom || dataTo) {
+			data.date = {}
+			if (dataFrom) data.date.$gte = dataFrom
+			if (dataTo) data.date.$lte = dataTo
+			delete data.dateFrom
+			delete data.dateTo
+		}
+		
 		return (
 			await TimeItem.find(data)
 				.populate('userId', '-password -__v -createdAt -updatedAt')

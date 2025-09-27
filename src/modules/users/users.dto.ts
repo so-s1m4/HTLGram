@@ -85,3 +85,14 @@ export const UpdateUserSchema = Joi.object<UpdateUserDto>({
     phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).optional(),
     email: Joi.string().email().max(256).optional(),
 }).or('name', 'password', 'email', 'phone');
+
+export type UpdateWorkDto = {
+    date: string; // ISO date string
+    timeStart: number; // Work time in minutes
+    timeEnd: number; // ISO time string
+}
+export const UpdateWorkSchema = Joi.object<UpdateWorkDto>({
+    date: Joi.string().isoDate().required(),
+    timeStart: Joi.number().min(0).max(24).required(),
+    timeEnd: Joi.number().min(0).max(24).required(),
+});

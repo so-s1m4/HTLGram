@@ -14,7 +14,6 @@ export interface TimeItemI {
   userId: mongoose.Types.ObjectId,
 
   timeStart: number,
-  timeEnd: number,
 
   createdAt?: Date
   updatedAt?: Date
@@ -30,7 +29,6 @@ const timeItemSchema = new Schema<TimeItemI, TimeItemModel>(
     userId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
 
     timeStart: { type: Number, required: true },
-    timeEnd: { type: Number, required: true },
   },
   {
     ...options,
@@ -52,18 +50,24 @@ export const TimeItem = mongoose.model<TimeItemI, TimeItemModel>('TimeItem', tim
 // ---------- Discriminators ----------
 
 export interface WorkI extends TimeItemI {
-  type: 'work'
+	type: 'work'
+	timeEnd: number
 }
-const workSchema = new Schema<WorkI>({})
+const workSchema = new Schema<WorkI>({
+  timeEnd: { type: Number, required: true },
+})
 export const Work = TimeItem.discriminator<WorkI>('work', workSchema)
 
 
 
 
 export interface BreakI extends TimeItemI {
-  type: 'break'
+	type: 'break'
+	timeEnd: { type: Number; required: true }
 }
-const breakSchema = new Schema<BreakI>({})
+const breakSchema = new Schema<BreakI>({
+  timeEnd: { type: Number, required: true },
+})
 export const Break = TimeItem.discriminator<BreakI>('break', breakSchema)
 
 
